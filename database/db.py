@@ -106,11 +106,11 @@ class Database:
         # Insertar Casos si no hay registros
         if not self.fetch_all("SELECT id FROM Casos LIMIT 1"):
             casos = [
-                ('Gestión', 'EXP-2024-001', 'Juan Pérez', '2024-01-15', 'Teléfono', 'Fraude', 'Corrupción', 'Empresa X', 'Alta', 15, 'Engaño financiero', 'Legal', 'Denuncia anónima', 'Análisis financiero', 'Investigación interna', 'Acciones legales', 'Se recomienda seguimiento', 'Ninguna', 'Adjunto PDF', 'Abierto', 2),
+                ('Gestión', 'EXP-2024-001', 'Juan Pérez', '2024-01-15', 'Teléfono', 'Fraude', 'Corrupción', 'Empresa X', 'Alta', 15, 'Engaño financiero', 'Denuncia anónima', 'Análisis financiero', 'Investigación interna', 'Acciones legales', 'Se recomienda seguimiento', 'Ninguna', 'Adjunto PDF', 'Abierto', 2),
 
-                ('Reclamo', 'EXP-2024-002', 'Ana Gómez', '2024-02-01', 'Computadora', 'Estafa', 'Phishing', 'Cliente', 'Media', 7, 'Suplantación de identidad', 'TI', 'Reporte interno', 'Análisis de correos', 'Bloqueo de cuentas', 'Recomendación de seguridad', 'Caso resuelto', 'Se realizó informe', 'Adjunto DOC', 'Cerrado', 3),
+                ('Reclamo', 'EXP-2024-002', 'Ana Gómez', '2024-02-01', 'Computadora', 'Estafa', 'Phishing', 'Cliente', 'Media', 7, 'Suplantación de identidad', 'Reporte interno', 'Análisis de correos', 'Bloqueo de cuentas', 'Recomendación de seguridad', 'Caso resuelto', 'Se realizó informe', 'Adjunto DOC', 'Cerrado', 3),
 
-                ('Caso', 'EXP-2024-003', 'Carlos Ruiz', '2024-03-10', 'Tarjeta de crédito', 'Fraude financiero', 'Cargos no autorizados', 'Cliente VIP', 'Alta', 10, 'Uso de credenciales robadas', 'Departamento de fraudes', 'Reporte bancario', 'Monitoreo de transacciones', 'Reversión de cargos', 'Educación al cliente', 'Seguimiento en curso', 'Pendiente de validación', 'Adjunto XLS', 'Asignado', 4)
+                ('Caso', 'EXP-2024-003', 'Carlos Ruiz', '2024-03-10', 'Tarjeta de crédito', 'Fraude financiero', 'Cargos no autorizados', 'Cliente VIP', 'Alta', 10, 'Departamento de fraudes', 'Reporte bancario', 'Monitoreo de transacciones', 'Reversión de cargos', 'Educación al cliente', 'Seguimiento en curso', 'Pendiente de validación', 'Adjunto XLS', 'Asignado', 4)
             ]
             for c in casos:
                 self.execute("INSERT INTO Casos (tipo, nro_expediente, investigador, fecha_inicio, movil_afectado, tipo_irregularidad, subtipo_irregularidad, objetivo_agraviado, incidencia, duracion_dias, descripcion_modus_operandi, area_apoyo_resolver, deteccion_procedencia, diagnostico_detalle, actuaciones_acciones, conclusiones_recomendaciones, observaciones, soporte, estatus, investigador_id) "
