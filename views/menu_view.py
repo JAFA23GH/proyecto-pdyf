@@ -1,4 +1,7 @@
 from views.caso_view import VentanaRegistro
+from views.cerrar_caso_view import VentanaCerrarCaso
+from views.gestionar_entidades_view import VentanaGestionarEntidades
+from views.auditorias_view import VentanaConsultarAuditorias
 import wx
 
 class MenuView(wx.Frame):
@@ -59,5 +62,17 @@ class MenuView(wx.Frame):
         if opcion == "Registrar caso de investigación":
             ventana = VentanaRegistro(self, usuario=self.nombre, rol=self.rol)  # Pasa el usuario y rol
             ventana.Show()  # Muestra la ventana
+        elif opcion == "Cerrar caso de investigación":
+            ventana = VentanaCerrarCaso(self, usuario=self.nombre, rol=self.rol)  # Pasa el usuario y rol
+            ventana.Show()  # Muestra la ventana
+        elif opcion == "Gestionar entidades":
+            ventana = VentanaGestionarEntidades(self, usuario=self.nombre, rol=self.rol)
+            ventana.Show()
+        # elif opcion == "Registrar archivos negados":
+        #     ventana = VentanaCerrarCaso(self, usuario=self.nombre, rol=self.rol)  # Pasa el usuario y rol
+        #     ventana.Show()  # Muestra la ventana
+        elif opcion == "Consultar auditorías":
+            ventana = VentanaConsultarAuditorias(self, usuario=self.nombre, rol=self.rol)
+            ventana.Show()
         wx.MessageBox(f"Seleccionaste: {opcion}", "Información", wx.OK | wx.ICON_INFORMATION)
 
