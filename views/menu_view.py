@@ -1,3 +1,4 @@
+from views.caso_view import VentanaRegistro
 import wx
 
 class MenuView(wx.Frame):
@@ -55,4 +56,8 @@ class MenuView(wx.Frame):
         """Maneja el clic en las opciones del menú."""
         button = event.GetEventObject()
         opcion = button.GetLabel()
+        if opcion == "Registrar caso de investigación":
+            ventana = VentanaRegistro(self, usuario=self.nombre, rol=self.rol)  # Pasa el usuario y rol
+            ventana.Show()  # Muestra la ventana
         wx.MessageBox(f"Seleccionaste: {opcion}", "Información", wx.OK | wx.ICON_INFORMATION)
+
