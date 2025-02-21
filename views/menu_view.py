@@ -1,4 +1,4 @@
-from views.caso_view import VentanaRegistro
+from controllers.caso_controller import CasoController
 import wx
 
 class MenuView(wx.Frame):
@@ -8,10 +8,15 @@ class MenuView(wx.Frame):
         self.user_id = user_id
         self.nombre = nombre
         self.rol = rol
+
+        # Cambiar el icono de la ventana
+        icon = wx.Icon("img/iconoinstitucional.ico", wx.BITMAP_TYPE_ICO)  # Cambia la ruta al icono
+        self.SetIcon(icon)
+
         self.InitUI()
 
     def InitUI(self):
-        self.SetTitle(f"Menú Principal - {self.nombre} ({self.rol})")
+        self.SetTitle(f"Menú Principal {self.nombre} ({self.rol})")
         self.SetSize((400, 500))
         panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -57,7 +62,17 @@ class MenuView(wx.Frame):
         button = event.GetEventObject()
         opcion = button.GetLabel()
         if opcion == "Registrar caso de investigación":
-            ventana = VentanaRegistro(self, usuario=self.nombre, rol=self.rol)  # Pasa el usuario y rol
-            ventana.Show()  # Muestra la ventana
-        wx.MessageBox(f"Seleccionaste: {opcion}", "Información", wx.OK | wx.ICON_INFORMATION)
+            self.Hide()  # Oculta la ventana del menú principal
+            self.controlador = CasoController(user_id=self.user_id, rol=self.rol, menu_view=self)
+            self.controlador.mostrar_ventana(vista="registro")
+        elif opcion == "Asignar casos":
+            self.Hide()  # Oculta la ventana del menú principal
+            self.controlador = CasoController(user_id=self.user_id, rol=self.rol, menu_view=self)
+            self.controlador.mostrar_ventana(vista="asignar")
+        else:
+            wx.MessageBox(f"Seleccionaste: {opcion}", "Información", wx.OK | wx.ICON_INFORMATION)
 
+
+
+    def reopen(self):
+        self.Show()  # Muestra la ventana del menú principal
