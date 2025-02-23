@@ -69,6 +69,10 @@ class MenuView(wx.Frame):
             self.Hide()  # Oculta la ventana del menú principal
             self.controlador = CasoController(user_id=self.user_id, rol=self.rol, menu_view=self)
             self.controlador.mostrar_ventana(vista="asignar")
+        elif opcion == "Modificar caso de investigación":
+            self.Hide()  # Oculta la ventana del menú principal
+            self.controlador = CasoController(user_id=self.user_id, rol=self.rol, menu_view=self)
+            self.controlador.mostrar_ventana(vista="modificar")
         else:
             wx.MessageBox(f"Seleccionaste: {opcion}", "Información", wx.OK | wx.ICON_INFORMATION)
 

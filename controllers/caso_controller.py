@@ -1,6 +1,7 @@
 from patterns.factory import ModelFactory
 from views.caso_view import VentanaRegistro
 from  views.asignar_caso_view import VentanaAsignar
+from  views.modificar_caso_view import VentanaModificar
 from datetime import datetime
 import wx
 
@@ -18,7 +19,8 @@ class CasoController:
             self.ventana = VentanaRegistro(None, controlador=self, usuario=self.user_id, rol=self.rol)
         elif vista=="asignar":
             self.ventana = VentanaAsignar(None, controlador=self, usuario=self.user_id, rol=self.rol)
-
+        elif vista=="modificar":
+            self.ventana = VentanaModificar(None, controlador=self, usuario=self.user_id, rol=self.rol)
         self.ventana.Show()
 
 
@@ -90,10 +92,18 @@ class CasoController:
         """Obtiene la lista de investigadores desde el modelo."""
         return self.modelo.obtener_investigadores()
 
-    def obtener_casos_abiertos(self):
+    def obtener_casos_abiertos(self, investigador_id):
         """Obtiene la lista de casos desde el modelo."""
-        return self.modelo.obtener_casos_abiertos()
+        return self.modelo.obtener_casos_abiertos(investigador_id)
 
     def obtener_datos_expediente(self, expediente):
         """Obtiene los datos del expediente específico."""
         return self.modelo.obtener_datos_expediente(expediente)
+
+    def asignar_investigador(self, expediente, investigador_id, investigador):
+        """Asigna un investigador a un caso específico."""
+        return self.modelo.asignar_investigador(expediente, investigador, investigador_id)
+
+    def obtener_id_investigador(self, nombre):
+        """Obtiene el ID del investigador."""
+        return self.modelo.obtener_id_investigador(nombre)

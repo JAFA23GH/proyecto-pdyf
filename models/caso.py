@@ -46,7 +46,12 @@ class CasoInvestigacionModel:
             return False, f"Error al guardar los datos: {e}"
 
 
-    def obtener_casos_abiertos(self):
+    def obtener_casos_abiertos(self, investigador_id=None):
+        """Obtiene todos los casos de investigación de la base de datos."""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        if investigador_id:
+            cursor.execute("SELECT * FROM Casos WHERE estatus = 'Abierto' AND investigador_id")
         """Obtiene todos los casos de investigación de la base de datos."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -54,6 +59,25 @@ class CasoInvestigacionModel:
         expedientes = [row[0] for row in cursor.fetchall()]
         conn.close()
         return expedientes
+
+    import sqlite3
+
+    def asignar_investigador(self, nro_expediente, nombre_investigador, investigador_id):
+        """Asigna un investigador a un caso específico, cambia el estatus a 'Asignado' y guarda el nombre del investigador."""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE Casos
+            SET investigador_id = ?, estatus = 'Asignado', investigador = ?
+            WHERE nro_expediente = ?
+        """, (investigador_id, nombre_investigador, nro_expediente))
+        conn.commit()
+        conn.close()
+        return True, "Investigador asignado correctamente."
+
+
+
+
 
     def obtener_datos_expediente(self, expediente):
         """Devuelve los datos del expediente especificado."""
