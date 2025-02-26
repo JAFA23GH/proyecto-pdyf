@@ -1,6 +1,7 @@
 from patterns.factory import ModelFactory
 from views.caso_view import VentanaRegistro
 from views.asignar_caso_view import VentanaAsignar
+from views.cerrar_caso_view import VentanaCerrarCaso
 from views.genera_rerporte_view import VentanaReportes
 from views.modificar_caso_view import VentanaModificar
 
@@ -33,7 +34,23 @@ class CasoController:
             self.ventana = VentanaVisAlarma(None, controlador=self, usuario=self.user_id, rol=self.rol)
         elif vista == "Reabrir-caso":
             self.ventana = VentanaReabrir(None, controlador=self, usuario=self.user_id, rol=self.rol)
+        elif vista == "Cerrar":
+            self.ventana = VentanaCerrarCaso(None, controlador=self, usuario=self.user_id, rol=self.rol)
         self.ventana.Show()
+
+    def obtener_casos_asignados(self, usuario):
+        """Obtiene los casos asignados al investigador logueado."""
+        return self.modelo.obtener_casos_asignados(usuario)
+        return []
+
+    def cerrar_caso(self, nro_expediente, observaciones, conclusiones, recomendaciones):
+        """Cierra un caso y actualiza los campos correspondientes."""
+        datos_actualizados = {
+            "observaciones": observaciones,
+            "conclusiones_recomendaciones": conclusiones,
+            "recomendaciones": recomendaciones
+        }
+        return self.modelo.modificar_caso(nro_expediente, datos_actualizados, "Cerrado")
 
     def registrar_caso(self, vista):
         """Obtiene los datos desde la vista y los guarda en la base de datos."""

@@ -1,3 +1,11 @@
+class Decorator:
+    def __init__(self, component):
+        self._component = component
+
+    def modificar_caso(self, nro_expediente, datos_actualizados, nuevo_estatus):
+        return self._component.modificar_caso(nro_expediente, datos_actualizados, nuevo_estatus)
+
+
 class CasoDecorator(Decorator):
     def __init__(self, component):
         super().__init__(component)

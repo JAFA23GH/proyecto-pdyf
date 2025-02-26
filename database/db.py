@@ -90,7 +90,7 @@ class Database(metaclass=SingletonMeta):
         if not self.fetch_all("SELECT id FROM Usuarios LIMIT 1"):
             usuarios = [
                 ("Admin", "admin", bcrypt.hashpw("admin123".encode('utf-8'), bcrypt.gensalt()), "Administrador"),
-                ("Juan Pérez", "jperez", bcrypt.hashpw("investigador1".encode('utf-8'), bcrypt.gensalt()), "Investigador"),
+                ("Juan Pérez", "jperez", bcrypt.hashpw("123".encode('utf-8'), bcrypt.gensalt()), "Investigador"),
                 ("Ana Gómez", "agomez", bcrypt.hashpw("investigador2".encode('utf-8'), bcrypt.gensalt()), "Investigador"),
                 ("Carlos Ruiz", "cruz", bcrypt.hashpw("123".encode('utf-8'), bcrypt.gensalt()), "Investigador"),
                 ("Sofía López", "slopez", bcrypt.hashpw("investigador4".encode('utf-8'), bcrypt.gensalt()), "Investigador"),

@@ -1,4 +1,3 @@
-from datetime import datetime, date
 import sqlite3
 from patterns.observer import Subject
 
@@ -6,6 +5,8 @@ class CasoInvestigacionModel(Subject):
     def __init__(self, db_path="investigacion.db"):
         super().__init__() # Inicializamos Subject
         self.db_path = db_path
+
+
 
     def obtener_investigadores(self):
         """Obtiene la lista de investigadores de la base de datos."""
@@ -133,7 +134,14 @@ class CasoInvestigacionModel(Subject):
         return True, "Investigador asignado correctamente."
 
 
-
+    def obtener_casos_asignados(self, investigador_id):
+        """Obtiene los casos asignados a un investigador con estatus 'Asignado'."""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT nro_expediente FROM Casos WHERE investigador_id = ? AND estatus = 'Asignado'", (investigador_id,))
+        expedientes = [row[0] for row in cursor.fetchall()]
+        conn.close()
+        return expedientes
 
 
     def obtener_datos_expediente(self, expediente):

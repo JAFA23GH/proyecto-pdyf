@@ -80,6 +80,9 @@ class MenuView(wx.Frame):
         elif opcion == "Reabrir caso de investigación":
             self.Hide()  # Oculta la ventana del menú principal
             self.controlador.mostrar_ventana(vista="Reabrir-caso")
+        elif opcion == "Cerrar caso de investigación":
+            self.Hide()  # Oculta la ventana del menú principal
+            self.controlador.mostrar_ventana(vista="Cerrar")
         else:
             wx.MessageBox(f"Seleccionaste: {opcion}", "Información", wx.OK | wx.ICON_INFORMATION)
 

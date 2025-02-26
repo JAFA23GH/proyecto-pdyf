@@ -1,13 +1,20 @@
 import wx
 
 class VentanaCerrarCaso(wx.Frame):
-    def __init__(self, parent, usuario, rol, *args, **kw):
+    def __init__(self, parent, controlador, usuario, rol, *args, **kw):
         super(VentanaCerrarCaso, self).__init__(parent, *args, **kw)
-
+        self.controlador = controlador  # Referencia al controlador
         self.usuario = usuario
         self.rol = rol
 
+        # Cambiar el icono de la ventana
+        icon = wx.Icon("img/iconoinstitucional.ico", wx.BITMAP_TYPE_ICO)  # Cambia la ruta al icono
+        self.SetIcon(icon)
+
         self.InitUI()
+
+        # Vincular el evento de cierre de la ventana
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
 
     def InitUI(self):
         pnl = wx.Panel(self)
@@ -17,24 +24,27 @@ class VentanaCerrarCaso(wx.Frame):
         st1 = wx.StaticText(pnl, label='Seleccione el caso:')
         vbox.Add(st1, flag=wx.LEFT | wx.TOP, border=10)
 
-        self.case_choice = wx.Choice(pnl, choices=self.get_open_cases())
+        # Obtener los casos asignados al investigador logueado
+        self.casos_asignados = self.controlador.obtener_casos_asignados(self.usuario)
+        self.case_choice = wx.Choice(pnl, choices=self.casos_asignados)
+        self.case_choice.Bind(wx.EVT_CHOICE, self.OnSeleccionarCaso)  # Evento al seleccionar un caso
         vbox.Add(self.case_choice, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
 
-        st2 = wx.StaticText(pnl, label='Observaciones:')
+        st2 = wx.StaticText(pnl, label='Actuaciones / acciones:')
         vbox.Add(st2, flag=wx.LEFT | wx.TOP, border=10)
-        
+
         self.obs_txt = wx.TextCtrl(pnl, style=wx.TE_MULTILINE)
         vbox.Add(self.obs_txt, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
 
-        st3 = wx.StaticText(pnl, label='Conclusiones:')
+        st3 = wx.StaticText(pnl, label='Observaciones')
         vbox.Add(st3, flag=wx.LEFT | wx.TOP, border=10)
-        
+
         self.concl_txt = wx.TextCtrl(pnl, style=wx.TE_MULTILINE)
         vbox.Add(self.concl_txt, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
 
-        st4 = wx.StaticText(pnl, label='Recomendaciones:')
+        st4 = wx.StaticText(pnl, label='Conclusiones / Recomendaciones:')
         vbox.Add(st4, flag=wx.LEFT | wx.TOP, border=10)
-        
+
         self.rec_txt = wx.TextCtrl(pnl, style=wx.TE_MULTILINE)
         vbox.Add(self.rec_txt, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
 
@@ -56,9 +66,17 @@ class VentanaCerrarCaso(wx.Frame):
         self.SetTitle('Cerrar Caso de Investigación')
         self.Centre()
 
-    def get_open_cases(self):
-        # Método para obtener la lista de casos abiertos desde la base de datos o lógica de negocio
-        return ["Caso 1", "Caso 2", "Caso 3"]
+    def OnSeleccionarCaso(self, event):
+        """Evento que se ejecuta cuando se selecciona un caso."""
+        expediente = self.case_choice.GetStringSelection()
+        if expediente:
+            # Obtener los datos del expediente seleccionado
+            datos_expediente = self.controlador.obtener_datos_expediente(expediente)
+            if datos_expediente:
+                # Llenar los campos con los datos del expediente
+                self.obs_txt.SetValue(datos_expediente.get("Actuaciones/Acciones Realizadas", ""))
+                self.concl_txt.SetValue(datos_expediente.get("Observaciones", ""))
+                self.rec_txt.SetValue(datos_expediente.get("Conclusiones / Recomendaciones", ""))
 
     def OnCloseCase(self, event):
         # Obtener los valores de los campos
@@ -75,19 +93,17 @@ class VentanaCerrarCaso(wx.Frame):
             wx.MessageBox('Por favor, complete todos los campos.', 'Error', wx.OK | wx.ICON_ERROR)
             return
 
-        # Implementar la lógica para cerrar el caso
-        wx.MessageBox(f'Caso "{case}" cerrado con éxito.', 'Información', wx.OK | wx.ICON_INFORMATION)
-        self.Close()
+        # Llamar al controlador para cerrar el caso
+        exito, mensaje = self.controlador.cerrar_caso(case, observations, conclusions, recommendations)
+        wx.MessageBox(mensaje, 'Información', wx.OK | wx.ICON_INFORMATION)
+        if exito:
+            self.Close()
 
     def OnCancel(self, event):
         # Lógica para cancelar y cerrar la ventana
         self.Close()
 
-def main():
-    app = wx.App()
-    ex = VentanaCerrarCaso(None, usuario="Juan", rol="Investigador")
-    ex.Show()
-    app.MainLoop()
-
-if __name__ == '__main__':
-    main()
+    def OnClose(self, event):
+        """Evento que se ejecuta cuando se intenta cerrar la ventana."""
+        # Cerrar la ventana
+        self.Destroy()
