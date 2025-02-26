@@ -15,3 +15,8 @@ class Subject:
     def notify(self, message):
         for observer in self._observers:
             observer.update(message)
+
+
+class CasoObserver(Observer):
+    def update(self, message):
+        print(f"Notificación: {message}")

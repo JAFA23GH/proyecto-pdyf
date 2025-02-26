@@ -1,8 +1,10 @@
 from datetime import datetime, date
 import sqlite3
+from patterns.observer import Subject
 
-class CasoInvestigacionModel:
+class CasoInvestigacionModel(Subject):
     def __init__(self, db_path="investigacion.db"):
+        super().__init__() # Inicializamos Subject
         self.db_path = db_path
 
     def obtener_investigadores(self):
@@ -45,6 +47,61 @@ class CasoInvestigacionModel:
         except sqlite3.Error as e:
             return False, f"Error al guardar los datos: {e}"
 
+
+    def asignar_investigador(self, nro_expediente, nombre_investigador, investigador_id):
+        """Asigna un investigador a un caso específico, notifica a los observadores."""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE Casos
+            SET investigador_id = ?, estatus = 'Asignado', investigador = ?
+            WHERE nro_expediente = ?
+        """, (investigador_id, nombre_investigador, nro_expediente))
+        conn.commit()
+        conn.close()
+        self.notify(f"Caso {nro_expediente} asignado a {nombre_investigador}") # Notificamos el cambio
+        return True, "Investigador asignado correctamente."
+
+    def modificar_caso(self, nro_expediente, datos_actualizados, nuevo_estatus):
+        """Modifica los datos de un caso y notifica a los observadores."""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        # Construir la consulta UPDATE dinámicamente
+        set_clausulas = ", ".join([f"{campo} = ?" for campo in datos_actualizados.keys()])
+        valores = list(datos_actualizados.values())
+        valores.append(nuevo_estatus)
+        valores.append(nro_expediente)
+
+        cursor.execute(f"""
+            UPDATE Casos
+            SET {set_clausulas}, estatus = ?
+            WHERE nro_expediente = ?
+        """, valores)
+
+        conn.commit()
+        conn.close()
+        self.notify(f"Caso {nro_expediente} modificado") # Notificamos el cambio
+        return True, "Caso modificado correctamente."
+
+    def obtener_casos_cerrados(self, investigador_id=None, rol=None):
+        """
+        Obtiene los casos de investigación según el rol del usuario.
+        Si el rol es 'Administrador', obtiene todos los casos con estatus 'Cerrado'.
+        Si el rol es 'Investigador', obtiene los casos con estatus 'Cerrado' asignados al investigador.
+        """
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        if rol == 'Administrador':
+            cursor.execute("SELECT nro_expediente, estatus FROM Casos WHERE estatus = 'Cerrado'")
+        elif rol == 'Investigador' and investigador_id:
+            cursor.execute("SELECT nro_expediente, estatus FROM Casos WHERE estatus = 'Cerrado' AND investigador_id = ?", (investigador_id,))
+        else:
+            conn.close()
+            return []  # Si no hay rol o investigador_id, devuelve una lista vacía
+        expedientes = [row[0] for row in cursor.fetchall()]
+        conn.close()
+        return expedientes
 
     def obtener_casos_abiertos(self, investigador_id=None):
         """Obtiene todos los casos de investigación de la base de datos."""

@@ -1,28 +1,39 @@
 from patterns.factory import ModelFactory
 from views.caso_view import VentanaRegistro
-from  views.asignar_caso_view import VentanaAsignar
-from  views.modificar_caso_view import VentanaModificar
+from views.asignar_caso_view import VentanaAsignar
+from views.genera_rerporte_view import VentanaReportes
+from views.modificar_caso_view import VentanaModificar
+
+from patterns.observer import CasoObserver
 from datetime import datetime
 import wx
+
+from views.reabrir_caso_view import VentanaReabrir
+from views.visualizar_alarma_py import VentanaVisAlarma
 
 class CasoController:
     def __init__(self, user_id, rol, menu_view):
         self.user_id = user_id
         self.rol = rol
         self.menu_view = menu_view  # Guarda la referencia de la ventana del menú
-        self.modelo = ModelFactory.create_model('Caso') # Se instancia el modelo
-
-
+        self.modelo = ModelFactory.create_model('Caso')  # Se instancia el modelo
+        self.observer = CasoObserver() # Creamos el observador
+        self.modelo.attach(self.observer) # Adjuntamos el observador al modelo
 
     def mostrar_ventana(self, vista):
-        if vista=="registro":
+        if vista == "registro":
             self.ventana = VentanaRegistro(None, controlador=self, usuario=self.user_id, rol=self.rol)
-        elif vista=="asignar":
+        elif vista == "asignar":
             self.ventana = VentanaAsignar(None, controlador=self, usuario=self.user_id, rol=self.rol)
-        elif vista=="modificar":
+        elif vista == "modificar":
             self.ventana = VentanaModificar(None, controlador=self, usuario=self.user_id, rol=self.rol)
+        elif vista == "Gen-reporte":
+            self.ventana = VentanaReportes(None, controlador=self, usuario=self.user_id, rol=self.rol)
+        elif vista == "Vis-alarma":
+            self.ventana = VentanaVisAlarma(None, controlador=self, usuario=self.user_id, rol=self.rol)
+        elif vista == "Reabrir-caso":
+            self.ventana = VentanaReabrir(None, controlador=self, usuario=self.user_id, rol=self.rol)
         self.ventana.Show()
-
 
     def registrar_caso(self, vista):
         """Obtiene los datos desde la vista y los guarda en la base de datos."""
@@ -64,9 +75,8 @@ class CasoController:
         # Determinar el estatus
         estatus = "Asignado" if vista.rol == "Investigador" else "Abierto"
 
-        if estatus=="Abierto":
-            investigador=""
-
+        if estatus == "Abierto":
+            investigador = ""
 
         # Guardar en la base de datos
         datos = [
@@ -96,6 +106,10 @@ class CasoController:
         """Obtiene la lista de casos desde el modelo."""
         return self.modelo.obtener_casos_abiertos(investigador_id)
 
+    def obtener_casos_cerrados(self, investigador_id):
+        """Obtiene la lista de casos desde el modelo."""
+        return self.modelo.obtener_casos_cerrados(investigador_id, self.rol)
+
     def obtener_datos_expediente(self, expediente):
         """Obtiene los datos del expediente específico."""
         return self.modelo.obtener_datos_expediente(expediente)
@@ -107,3 +121,7 @@ class CasoController:
     def obtener_id_investigador(self, nombre):
         """Obtiene el ID del investigador."""
         return self.modelo.obtener_id_investigador(nombre)
+
+    def modificar_caso(self, nro_expediente, datos_actualizados, nuevo_estatus):
+        """Modifica los datos de un caso específico."""
+        return self.modelo.modificar_caso(nro_expediente, datos_actualizados, nuevo_estatus)

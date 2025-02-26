@@ -1,6 +1,18 @@
-class Decorator:
+class CasoDecorator(Decorator):
     def __init__(self, component):
-        self._component = component
+        super().__init__(component)
 
-    def operation(self):
-        return self._component.operation()
+    def modificar_caso(self, nro_expediente, datos_actualizados, nuevo_estatus):
+        # Llamar a la operación original
+        resultado = self._component.modificar_caso(nro_expediente, datos_actualizados, nuevo_estatus)
+
+        # Operación adicional: Log de la modificación
+        if resultado:
+            self.log_modificacion(nro_expediente, datos_actualizados, nuevo_estatus)
+
+        return resultado
+
+    def log_modificacion(self, nro_expediente, datos_actualizados, nuevo_estatus):
+        print(f"Modificación registrada para expediente {nro_expediente}:")
+        print(f"Datos actualizados: {datos_actualizados}")
+        print(f"Nuevo estatus: {nuevo_estatus}")

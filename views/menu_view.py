@@ -61,18 +61,25 @@ class MenuView(wx.Frame):
         """Maneja el clic en las opciones del menú."""
         button = event.GetEventObject()
         opcion = button.GetLabel()
+        self.controlador = CasoController(user_id=self.user_id, rol=self.rol, menu_view=self)
         if opcion == "Registrar caso de investigación":
             self.Hide()  # Oculta la ventana del menú principal
-            self.controlador = CasoController(user_id=self.user_id, rol=self.rol, menu_view=self)
             self.controlador.mostrar_ventana(vista="registro")
         elif opcion == "Asignar casos":
             self.Hide()  # Oculta la ventana del menú principal
-            self.controlador = CasoController(user_id=self.user_id, rol=self.rol, menu_view=self)
             self.controlador.mostrar_ventana(vista="asignar")
         elif opcion == "Modificar caso de investigación":
             self.Hide()  # Oculta la ventana del menú principal
-            self.controlador = CasoController(user_id=self.user_id, rol=self.rol, menu_view=self)
             self.controlador.mostrar_ventana(vista="modificar")
+        elif opcion == "Generar reportes":
+            self.Hide()  # Oculta la ventana del menú principal
+            self.controlador.mostrar_ventana(vista="Gen-reporte")
+        elif opcion == "Visualizar alarmas":
+            self.Hide()  # Oculta la ventana del menú principal
+            self.controlador.mostrar_ventana(vista="Vis-alarma")
+        elif opcion == "Reabrir caso de investigación":
+            self.Hide()  # Oculta la ventana del menú principal
+            self.controlador.mostrar_ventana(vista="Reabrir-caso")
         else:
             wx.MessageBox(f"Seleccionaste: {opcion}", "Información", wx.OK | wx.ICON_INFORMATION)
 
