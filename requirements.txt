@@ -1,3 +1,3 @@
-wxPython
+wxPython~=4.2.2
 SQLAlchemy
-bcrypt
+bcrypt~=4.2.1

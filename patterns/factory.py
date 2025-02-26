@@ -1,4 +1,4 @@
-from models.caso import Caso
+from models.caso import CasoInvestigacionModel
 from models.avance import Avance
 from models.alarma import Alarma
 
@@ -6,7 +6,7 @@ class ModelFactory:
     @staticmethod
     def create_model(model_type, *args, **kwargs):
         if model_type == 'Caso':
-            return Caso(*args, **kwargs)
+            return CasoInvestigacionModel(*args, **kwargs)
         elif model_type == 'Avance':
             return Avance(*args, **kwargs)
         elif model_type == 'Alarma':

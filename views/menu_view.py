@@ -1,7 +1,4 @@
-from views.caso_view import VentanaRegistro
-from views.cerrar_caso_view import VentanaCerrarCaso
-from views.gestionar_entidades_view import VentanaGestionarEntidades
-from views.auditorias_view import VentanaConsultarAuditorias
+from controllers.caso_controller import CasoController
 import wx
 
 class MenuView(wx.Frame):
@@ -11,10 +8,15 @@ class MenuView(wx.Frame):
         self.user_id = user_id
         self.nombre = nombre
         self.rol = rol
+
+        # Cambiar el icono de la ventana
+        icon = wx.Icon("img/iconoinstitucional.ico", wx.BITMAP_TYPE_ICO)  # Cambia la ruta al icono
+        self.SetIcon(icon)
+
         self.InitUI()
 
     def InitUI(self):
-        self.SetTitle(f"Menú Principal - {self.nombre} ({self.rol})")
+        self.SetTitle(f"Menú Principal {self.nombre} ({self.rol})")
         self.SetSize((400, 500))
         panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -59,20 +61,29 @@ class MenuView(wx.Frame):
         """Maneja el clic en las opciones del menú."""
         button = event.GetEventObject()
         opcion = button.GetLabel()
+        self.controlador = CasoController(user_id=self.user_id, rol=self.rol, menu_view=self)
         if opcion == "Registrar caso de investigación":
-            ventana = VentanaRegistro(self, usuario=self.nombre, rol=self.rol)  # Pasa el usuario y rol
-            ventana.Show()  # Muestra la ventana
-        elif opcion == "Cerrar caso de investigación":
-            ventana = VentanaCerrarCaso(self, usuario=self.nombre, rol=self.rol)  # Pasa el usuario y rol
-            ventana.Show()  # Muestra la ventana
-        elif opcion == "Gestionar entidades":
-            ventana = VentanaGestionarEntidades(self, usuario=self.nombre, rol=self.rol)
-            ventana.Show()
-        # elif opcion == "Registrar archivos negados":
-        #     ventana = VentanaCerrarCaso(self, usuario=self.nombre, rol=self.rol)  # Pasa el usuario y rol
-        #     ventana.Show()  # Muestra la ventana
-        elif opcion == "Consultar auditorías":
-            ventana = VentanaConsultarAuditorias(self, usuario=self.nombre, rol=self.rol)
-            ventana.Show()
-        wx.MessageBox(f"Seleccionaste: {opcion}", "Información", wx.OK | wx.ICON_INFORMATION)
+            self.Hide()  # Oculta la ventana del menú principal
+            self.controlador.mostrar_ventana(vista="registro")
+        elif opcion == "Asignar casos":
+            self.Hide()  # Oculta la ventana del menú principal
+            self.controlador.mostrar_ventana(vista="asignar")
+        elif opcion == "Modificar caso de investigación":
+            self.Hide()  # Oculta la ventana del menú principal
+            self.controlador.mostrar_ventana(vista="modificar")
+        elif opcion == "Generar reportes":
+            self.Hide()  # Oculta la ventana del menú principal
+            self.controlador.mostrar_ventana(vista="Gen-reporte")
+        elif opcion == "Visualizar alarmas":
+            self.Hide()  # Oculta la ventana del menú principal
+            self.controlador.mostrar_ventana(vista="Vis-alarma")
+        elif opcion == "Reabrir caso de investigación":
+            self.Hide()  # Oculta la ventana del menú principal
+            self.controlador.mostrar_ventana(vista="Reabrir-caso")
+        else:
+            wx.MessageBox(f"Seleccionaste: {opcion}", "Información", wx.OK | wx.ICON_INFORMATION)
 
+
+
+    def reopen(self):
+        self.Show()  # Muestra la ventana del menú principal
