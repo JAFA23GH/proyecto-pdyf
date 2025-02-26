@@ -10,3 +10,6 @@ __pycache__/
 # Archivos de configuración y datos locales
 .env
 .DS_Store
+
+build/
+dist/
