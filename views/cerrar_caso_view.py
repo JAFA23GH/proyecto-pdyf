@@ -102,6 +102,7 @@ class VentanaCerrarCaso(wx.Frame):
     def OnCancel(self, event):
         # Lógica para cancelar y cerrar la ventana
         self.Close()
+        self.controlador.menu_view.reopen()
 
     def OnClose(self, event):
         """Evento que se ejecuta cuando se intenta cerrar la ventana."""

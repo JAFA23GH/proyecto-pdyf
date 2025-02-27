@@ -1,9 +1,9 @@
 import wx
 
 class VentanaGestionarEntidades(wx.Frame):
-    def __init__(self, parent, usuario, rol, *args, **kw):
+    def __init__(self, parent, controlador, usuario, rol, *args, **kw):
         super(VentanaGestionarEntidades, self).__init__(parent, title="Gestionar Entidades", size=(600, 400), *args, **kw)
-        
+        self.controlador = controlador
         self.usuario = usuario
         self.rol = rol
         self.entities = ["Tipo de Brecha", "Tipo de Proyecto", "Procesos Corregidos", 

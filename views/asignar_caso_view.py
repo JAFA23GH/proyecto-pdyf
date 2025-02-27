@@ -4,7 +4,7 @@ class VentanaAsignar(wx.Frame):
     def __init__(self, parent, controlador, usuario, rol, menu_view=None):
         super(VentanaAsignar, self).__init__(parent)
         self.SetTitle("Asignar Caso")
-        self.SetSize((800, 1000))  # Aumentar el tamaño de la ventana
+        self.SetSize((800, 600))  # Aumentar el tamaño de la ventana
         self.controlador = controlador  # Referencia al controlador
         self.usuario = usuario
         self.rol = rol

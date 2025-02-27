@@ -83,6 +83,9 @@ class MenuView(wx.Frame):
         elif opcion == "Cerrar caso de investigación":
             self.Hide()  # Oculta la ventana del menú principal
             self.controlador.mostrar_ventana(vista="Cerrar")
+        elif opcion == "Gestionar entidades":
+            self.Hide()  # Oculta la ventana del menú principal
+            self.controlador.mostrar_ventana(vista="Gestionar")
         else:
             wx.MessageBox(f"Seleccionaste: {opcion}", "Información", wx.OK | wx.ICON_INFORMATION)
 

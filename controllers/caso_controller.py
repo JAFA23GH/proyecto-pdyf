@@ -11,6 +11,7 @@ import wx
 
 from views.reabrir_caso_view import VentanaReabrir
 from views.visualizar_alarma_py import VentanaVisAlarma
+from views.gestionar_entidades_view import VentanaGestionarEntidades
 
 class CasoController:
     def __init__(self, user_id, rol, menu_view):
@@ -36,6 +37,8 @@ class CasoController:
             self.ventana = VentanaReabrir(None, controlador=self, usuario=self.user_id, rol=self.rol)
         elif vista == "Cerrar":
             self.ventana = VentanaCerrarCaso(None, controlador=self, usuario=self.user_id, rol=self.rol)
+        elif vista == "Gestionar":
+            self.ventana = VentanaGestionarEntidades(None, controlador=self, usuario=self.user_id, rol=self.rol)
         self.ventana.Show()
 
     def obtener_casos_asignados(self, usuario):

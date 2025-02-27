@@ -1,13 +1,22 @@
 import wx
 import wx.grid
 import sqlite3
+import wx.lib.scrolledpanel as scrolled
 
 class VentanaReportes(wx.Frame):
-    def __init__(self, parent,  controlador, usuario, rol, menu_view=None, db_path="investigacion.db",):
-        super(VentanaReportes, self).__init__(parent, title="Menú de Reportes", size=(600, 400))
+    def __init__(self, parent, controlador, usuario, rol, menu_view=None, db_path="investigacion.db"):
+        super(VentanaReportes, self).__init__(parent, title="Menú de Reportes", size=(600, 600))
         self.db_path = db_path
+        self.controlador = controlador  # Referencia al controlador
+        self.usuario = usuario
+        self.rol = rol
+        self.menu_view = menu_view  # Guardar la referencia al menú principal
         self.SetTitle("Generar Reporte")
-        panel = wx.Panel(self)
+
+        # Crear un panel con scroll
+        self.scroll_panel = scrolled.ScrolledPanel(self, style=wx.VSCROLL)
+        self.scroll_panel.SetupScrolling()  # Habilitar el scroll
+
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         # Cambiar el icono de la ventana
@@ -15,7 +24,7 @@ class VentanaReportes(wx.Frame):
         self.SetIcon(icon)
 
         # Título del menú
-        titulo = wx.StaticText(panel, label="Seleccione el Reporte:")
+        titulo = wx.StaticText(self.scroll_panel, label="Seleccione el Reporte:")
         titulo.SetFont(wx.Font(18, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
         vbox.Add(titulo, flag=wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM, border=20)
 
@@ -26,18 +35,22 @@ class VentanaReportes(wx.Frame):
             ("Casos Abiertos por Investigador", self.generar_reporte_casos_abiertos_por_investigador),
             ("Avances por Caso", self.generar_reporte_avances_por_caso),
             ("Auditorías por Usuario", self.generar_reporte_auditorias_por_usuario),
-            ("Alarmas por Caso", self.generar_reporte_alarmas_por_caso),  # Ejemplo adicional
-            ("Casos por Estatus", self.generar_reporte_casos_por_estatus), # Ejemplo adicional
-            ("Casos por Tipo Irregularidad", self.generar_reporte_casos_por_tipo_irregularidad) # Ejemplo adicional
-
+            ("Alarmas por Caso", self.generar_reporte_alarmas_por_caso),
+            ("Casos por Estatus", self.generar_reporte_casos_por_estatus),
+            ("Casos por Tipo Irregularidad", self.generar_reporte_casos_por_tipo_irregularidad)
         ]
 
         for texto_boton, funcion_reporte in botones:
-            boton = wx.Button(panel, label=texto_boton)
+            boton = wx.Button(self.scroll_panel, label=texto_boton)
             boton.Bind(wx.EVT_BUTTON, lambda event, func=funcion_reporte: self.mostrar_reporte(event, func))
             vbox.Add(boton, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
 
-        panel.SetSizer(vbox)
+        # Botón de "Atrás"
+        btn_atras = wx.Button(self.scroll_panel, label="Atrás", size=(100, 30))
+        vbox.Add(btn_atras, flag=wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM, border=10)
+        btn_atras.Bind(wx.EVT_BUTTON, self.on_atras)
+
+        self.scroll_panel.SetSizer(vbox)
 
     def mostrar_reporte(self, event, funcion_reporte):
         """Genera y muestra el reporte en una nueva ventana."""
@@ -48,6 +61,12 @@ class VentanaReportes(wx.Frame):
         else:
             wx.MessageBox("No se encontraron resultados para este reporte.", "Información", wx.OK | wx.ICON_INFORMATION)
 
+    def on_atras(self, event):
+        """Maneja el clic en el botón 'Atrás'."""
+        self.Close()  # Cierra la ventana actual
+        self.controlador.menu_view.reopen()
+
+    # Métodos para generar reportes (ya existentes)
     def generar_reporte_casos_por_tipo(self):
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -111,6 +130,7 @@ class VentanaReportes(wx.Frame):
         resultados = cursor.fetchall()
         conn.close()
         return resultados
+
     def generar_reporte_alarmas_por_caso(self):
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -122,6 +142,7 @@ class VentanaReportes(wx.Frame):
         resultados = cursor.fetchall()
         conn.close()
         return resultados
+
     def generar_reporte_casos_por_estatus(self):
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -165,4 +186,14 @@ class VentanaMostrarReporte(wx.Frame):
 
         grid.AutoSizeColumns()
         vbox.Add(grid, flag=wx.EXPAND | wx.ALL, border=10)
+
+        # Botón de "Atrás"
+        btn_atras = wx.Button(panel, label="Atrás", size=(100, 30))
+        vbox.Add(btn_atras, flag=wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM, border=10)
+        btn_atras.Bind(wx.EVT_BUTTON, self.on_atras)
+
         panel.SetSizer(vbox)
+
+    def on_atras(self, event):
+        """Maneja el clic en el botón 'Atrás'."""
+        self.Close()  # Cierra la ventana actual

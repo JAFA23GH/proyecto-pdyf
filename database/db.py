@@ -78,7 +78,21 @@ class Database(metaclass=SingletonMeta):
                 usuario_id INTEGER NOT NULL,
                 FOREIGN KEY (caso_id) REFERENCES Casos(id),
                 FOREIGN KEY (usuario_id) REFERENCES Usuarios(id)
-            );"""
+            );""",
+            """CREATE TABLE IF NOT EXISTS Entidades (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tipo_brecha TEXT NOT NULL,
+            tipo_proyecto TEXT NOT NULL,
+            proceso_corregido TEXT NOT NULL,
+            procesos_realizado TEXT NOT NULL,
+            investigador_id INTEGER NOT NULL,  -- Clave foránea
+            empresa TEXT NOT NULL,
+            subtipo_ficha TEXT NOT NULL,
+            tipo_irregularidad TEXT NOT NULL,
+            subtipo_irregularidad TEXT NOT NULL,
+            procedencia_casos TEXT NOT NULL,
+            FOREIGN KEY (investigador_id) REFERENCES Usuarios(id)  -- Relación con Usuarios
+        );"""
         ]
         for table in tables:
             self.execute(table)
@@ -290,3 +304,28 @@ class Database(metaclass=SingletonMeta):
             ]
             for aud in auditorias:
                 self.execute("INSERT INTO Auditorias (caso_id, accion, fecha, usuario_id) VALUES (?, ?, ?, ?)", aud)
+
+        # Insertar entidades si no hay registros
+        if not self.fetch_all("SELECT id FROM Entidades LIMIT 1"):
+            """Inserta datos de ejemplo en la tabla Entidades."""
+            sample_entidades = [
+                ("Brecha de Seguridad", "Proyecto A", "Proceso X", "Proceso Y", 10, "Empresa 1", "Subtipo 1", "Irregularidad 1", "Subtipo Irregularidad 1", "Caso 1"),
+                ("Brecha de Privacidad", "Proyecto B", "Proceso Z", "Proceso W", 2, "Empresa 2", "Subtipo 2", "Irregularidad 2", "Subtipo Irregularidad 2", "Caso 2"),
+                ("Brecha de Cumplimiento", "Proyecto C", "Proceso A", "Proceso B", 3, "Empresa 3", "Subtipo 3", "Irregularidad 3", "Subtipo Irregularidad 3", "Caso 3"),
+                ("Brecha de Seguridad", "Proyecto D", "Proceso C", "Proceso D", 11, "Empresa 4", "Subtipo 4", "Irregularidad 4", "Subtipo Irregularidad 4", "Caso 4"),
+                ("Brecha de Privacidad", "Proyecto E", "Proceso E", "Proceso F", 2, "Empresa 5", "Subtipo 5", "Irregularidad 5", "Subtipo Irregularidad 5", "Caso 5"),
+                ("Brecha de Cumplimiento", "Proyecto F", "Proceso G", "Proceso H", 3, "Empresa 6", "Subtipo 6", "Irregularidad 6", "Subtipo Irregularidad 6", "Caso 6"),
+                ("Brecha de Seguridad", "Proyecto G", "Proceso I", "Proceso J", 18, "Empresa 7", "Subtipo 7", "Irregularidad 7", "Subtipo Irregularidad 7", "Caso 7"),
+                ("Brecha de Privacidad", "Proyecto H", "Proceso K", "Proceso L", 2, "Empresa 8", "Subtipo 8", "Irregularidad 8", "Subtipo Irregularidad 8", "Caso 8"),
+                ("Brecha de Cumplimiento", "Proyecto I", "Proceso M", "Proceso N", 3, "Empresa 9", "Subtipo 9", "Irregularidad 9", "Subtipo Irregularidad 9", "Caso 9"),
+                ("Brecha de Seguridad", "Proyecto J", "Proceso O", "Proceso P", 16, "Empresa 10", "Subtipo 10", "Irregularidad 10", "Subtipo Irregularidad 10", "Caso 10")
+            ]
+
+            for entidad in sample_entidades:
+                self.execute(
+                    """INSERT INTO Entidades (
+                        tipo_brecha, tipo_proyecto, proceso_corregido, procesos_realizado, 
+                        investigador_id, empresa, subtipo_ficha, tipo_irregularidad, 
+                        subtipo_irregularidad, procedencia_casos
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", entidad
+                )
