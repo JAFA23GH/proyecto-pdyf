@@ -231,3 +231,67 @@ class CasoInvestigacionModel(Subject):
                 "Soporte": resultado[0][18],
             }
         return None
+
+    def obtener_casos_filtrados(self, dias_abierto, tipo_irregularidad):
+        """Obtiene los casos filtrados por días abiertos y tipo de irregularidad."""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        # Construir la consulta SQL dinámicamente
+        query = "SELECT * FROM Casos WHERE estatus = 'Abierto'"
+        params = []
+
+        if dias_abierto is not None:
+            query += " AND (julianday('now') - julianday(fecha_inicio) >= ?)"
+            params.append(dias_abierto)
+
+        if tipo_irregularidad:
+            query += " AND tipo_irregularidad = ?"
+            params.append(tipo_irregularidad)
+
+        try:
+            cursor.execute(query, params)
+            resultados = cursor.fetchall()
+        except sqlite3.Error as e:
+            print(f"Error al ejecutar la consulta: {e}")
+            return []
+        finally:
+            conn.close()
+
+        # Convertir los resultados en una lista de diccionarios
+        casos_filtrados = []
+        for resultado in resultados:
+            caso = {
+                "nro_expediente": resultado[2],  # Asegurar que 'nro_expediente' está presente
+                "Tipo de Caso": resultado[1],
+                "Investigador": resultado[3],
+                "Fecha de inicio": resultado[4],
+                "Móvil afectado": resultado[5],
+                "Tipo de irregularidad": resultado[6],
+                "Subtipo irregularidad": resultado[7],
+                "Objetivo / Agraviado": resultado[8],
+                "Incidencia": resultado[9],
+                "Duración (Días)": resultado[10],
+                "Descripción Modus Operandi": resultado[11],
+                "Área Apoyo a Resolver": resultado[12],
+                "Detección / Procedencia del Caso": resultado[13],
+                "Diagnostico / Detalle de Comprobación para Determinar Fraude": resultado[14],
+                "Actuaciones/Acciones Realizadas": resultado[15],
+                "Conclusiones / Recomendaciones": resultado[16],
+                "Observaciones": resultado[17],
+                "Soporte": resultado[18],
+            }
+            casos_filtrados.append(caso)
+
+        return casos_filtrados
+
+
+
+    def obtener_tipos_irregularidades(self):
+        """Obtiene la lista de tipos de irregularidades disponibles."""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT DISTINCT tipo_irregularidad FROM Casos")
+        tipos_irregularidades = [row[0] for row in cursor.fetchall()]
+        conn.close()
+        return tipos_irregularidades

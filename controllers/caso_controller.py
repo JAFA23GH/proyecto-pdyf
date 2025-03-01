@@ -171,3 +171,11 @@ class CasoController:
     def modificar_caso(self, nro_expediente, datos_actualizados, nuevo_estatus):
         """Modifica los datos de un caso específico."""
         return self.modelo.modificar_caso(nro_expediente, datos_actualizados, nuevo_estatus)
+
+    def obtener_casos_filtrados(self, dias_abierto, tipo_irregularidad):
+        """Obtiene los casos filtrados por días abiertos y tipo de irregularidad."""
+        return self.modelo.obtener_casos_filtrados(dias_abierto, tipo_irregularidad)
+
+    def obtener_tipos_irregularidades(self):
+        """Obtiene la lista de tipos de irregularidades desde el modelo."""
+        return self.modelo.obtener_tipos_irregularidades()

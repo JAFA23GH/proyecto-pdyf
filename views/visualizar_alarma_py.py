@@ -50,6 +50,28 @@ class VentanaVisAlarma(wx.Frame):
         vbox.Add(investigador_text, flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=10)
         self.text_ctrls["Investigador"] = investigador_text  # Agregar al diccionario para llenarlo
 
+        # Filtro de días abierto
+        self.dias_abierto_label = wx.StaticText(panel, label="Días abierto mínimo:")
+        vbox.Add(self.dias_abierto_label, flag=wx.ALIGN_LEFT | wx.TOP, border=10)
+        self.dias_abierto_ctrl = wx.TextCtrl(panel)
+        vbox.Add(self.dias_abierto_ctrl, flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=10)
+
+        # Filtro de tipo de irregularidad
+        self.tipo_irregularidad_label = wx.StaticText(panel, label="Tipo de irregularidad:")
+        vbox.Add(self.tipo_irregularidad_label, flag=wx.ALIGN_LEFT | wx.TOP, border=10)
+        self.tipo_irregularidad_combo = wx.ComboBox(panel, choices=self.controlador.obtener_tipos_irregularidades())
+        vbox.Add(self.tipo_irregularidad_combo, flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=10)
+
+        # Botón de aplicar filtros
+        self.boton_aplicar_filtros = wx.Button(panel, label="Aplicar Filtros")
+        self.boton_aplicar_filtros.Disable()  # Deshabilitar el botón inicialmente
+        vbox.Add(self.boton_aplicar_filtros, flag=wx.ALIGN_CENTER | wx.ALL, border=20)
+        self.boton_aplicar_filtros.Bind(wx.EVT_BUTTON, self.on_aplicar_filtros)
+
+        # Eventos para habilitar/deshabilitar el botón de filtrar
+        self.dias_abierto_ctrl.Bind(wx.EVT_TEXT, self.on_cambio_filtro)
+        self.tipo_irregularidad_combo.Bind(wx.EVT_COMBOBOX, self.on_cambio_filtro)
+
         # Botones
         hbox_botones = wx.BoxSizer(wx.HORIZONTAL)
         boton_aceptar = wx.Button(panel, label="Aceptar")
@@ -62,6 +84,64 @@ class VentanaVisAlarma(wx.Frame):
         boton_aceptar.Bind(wx.EVT_BUTTON, self.on_cerrar)  # Ambos botones cierran la ventana
         boton_cancelar.Bind(wx.EVT_BUTTON, self.on_cerrar)
         panel.SetSizer(vbox)
+
+    def on_cambio_filtro(self, event):
+        """Habilita o deshabilita el botón de filtrar según si hay filtros seleccionados."""
+        dias_abierto = self.dias_abierto_ctrl.GetValue().strip()
+        tipo_irregularidad = self.tipo_irregularidad_combo.GetValue().strip()
+
+        # Habilitar el botón si al menos un filtro está seleccionado
+        if dias_abierto or tipo_irregularidad:
+            self.boton_aplicar_filtros.Enable()
+        else:
+            self.boton_aplicar_filtros.Disable()
+
+    def on_aplicar_filtros(self, event):
+        """Aplica los filtros y actualiza la vista."""
+        dias_abierto = self.dias_abierto_ctrl.GetValue().strip()
+        tipo_irregularidad = self.tipo_irregularidad_combo.GetValue().strip()
+
+        # Validar que al menos un filtro esté seleccionado
+        if not dias_abierto and not tipo_irregularidad:
+            wx.MessageBox("Debe seleccionar al menos un filtro (días abierto o tipo de irregularidad).", "Error", wx.OK | wx.ICON_ERROR)
+            return
+
+        # Convertir días abierto a entero (si está presente)
+        dias_abierto_int = None
+        if dias_abierto:
+            try:
+                dias_abierto_int = int(dias_abierto)
+            except ValueError:
+                wx.MessageBox("El valor de días abierto debe ser un número entero.", "Error", wx.OK | wx.ICON_ERROR)
+                return
+
+        # Obtener los casos filtrados
+        casos_filtrados = self.controlador.obtener_casos_filtrados(dias_abierto_int, tipo_irregularidad)
+
+        # Mostrar mensaje con la cantidad de expedientes filtrados
+        wx.MessageBox(f"Se encontraron {len(casos_filtrados)} expedientes que cumplen con los filtros.", "Resultados", wx.OK | wx.ICON_INFORMATION)
+
+        # Actualizar la vista con los casos filtrados
+        self.actualizar_vista(casos_filtrados)
+
+
+    def actualizar_vista(self, casos):
+        """Actualiza la vista con los casos filtrados."""
+        # Limpiar la lista de expedientes en el ComboBox
+        self.nro_expediente_combo.Clear()
+
+        # Agregar los casos filtrados al ComboBox
+        for caso in casos:
+            self.nro_expediente_combo.Append(caso['nro_expediente'])
+
+        # Limpiar todos los campos de texto
+        for campo in self.text_ctrls:
+            self.text_ctrls[campo].SetValue("")
+
+        # Dejar la lista vacía, esperando que el usuario seleccione un expediente
+        if casos:
+            self.nro_expediente_combo.SetSelection(wx.NOT_FOUND)  # No seleccionar nada automáticamente
+
 
     def on_expediente_select(self, event):
         """Llena los campos de texto con los datos del expediente seleccionado."""
@@ -76,7 +156,6 @@ class VentanaVisAlarma(wx.Frame):
             for campo, valor in datos_expediente.items():
                 if campo in self.text_ctrls:
                     self.text_ctrls[campo].SetValue(str(valor))
-
 
     def on_cerrar(self, event):
         self.Hide()
