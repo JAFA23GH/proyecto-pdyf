@@ -1,6 +1,7 @@
 from controllers.investigador_controller import GestionarUsuariosController
 from controllers.caso_controller import CasoController
 from controllers.entidades_controller import GestionarEntidadesController
+from controllers.disciplinario_controller import GestionardisciplinarioController
 import wx
 
 class MenuView(wx.Frame):
@@ -75,6 +76,7 @@ class MenuView(wx.Frame):
         self.controlador = CasoController(user_id=self.user_id, rol=self.rol, menu_view=self)
         self.controlador1 = GestionarUsuariosController(menu_view=self)
         self.controlador2 = GestionarEntidadesController(menu_view=self)
+        self.controlador3 = GestionardisciplinarioController(menu_view=self)
 
 
         if opcion == "Registrar caso de investigación":
@@ -104,6 +106,9 @@ class MenuView(wx.Frame):
         elif opcion == "Gestionar Investigadores":
             self.Hide()  # Oculta la ventana del menú principal
             self.controlador1.mostrar_ventana(vista="GestionarUser")
+        elif opcion == "Registrar archivos negados":
+            self.Hide()  # Oculta la ventana del menú principal
+            self.controlador3.mostrar_ventana(vista="Negar")
         else:
             wx.MessageBox(f"Seleccionaste: {opcion}", "Información", wx.OK | wx.ICON_INFORMATION)
 

@@ -6,7 +6,57 @@ class CasoInvestigacionModel(Subject):
         super().__init__() # Inicializamos Subject
         self.db_path = db_path
 
+        # Diccionario para mapear etiquetas de los inputs a nombres de columnas en la base de datos
+        self.mapeo_etiquetas_a_columnas = {
+            "Descripción Modus Operandi": "descripcion_modus_operandi",
+            "Diagnostico / Detalle de Comprobación para Determinar Fraude": "diagnostico_detalle",
+            "Actuaciones/Acciones Realizadas": "actuaciones_acciones",
+            "Conclusiones / Recomendaciones": "conclusiones_recomendaciones",
+            "Observaciones": "observaciones",
+            "Soporte": "soporte"
+        }
 
+    def obtener_id_caso_por_expediente(self, nro_expediente):
+        """Obtiene el id de la tabla Casos a partir del número de expediente."""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM Casos WHERE nro_expediente = ?", (nro_expediente,))
+        resultado = cursor.fetchone()
+        conn.close()
+        return resultado[0] if resultado else None
+
+    def insertar_avance(self, caso_id, descripcion, fecha):
+        """Inserta un registro en la tabla Avances."""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO Avances (caso_id, descripcion, fecha)
+            VALUES (?, ?, ?)
+        """, (caso_id, descripcion, fecha))
+        conn.commit()
+        conn.close()
+
+    def insertar_alarma(self, caso_id, motivo, fecha):
+        """Inserta un registro en la tabla Alarmas."""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO Alarmas (caso_id, motivo, fecha)
+            VALUES (?, ?, ?)
+        """, (caso_id, motivo, fecha))
+        conn.commit()
+        conn.close()
+
+    def insertar_auditoria(self, caso_id, accion, fecha, usuario_id):
+        """Inserta un registro en la tabla Auditorias."""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO Auditorias (caso_id, accion, fecha, usuario_id)
+            VALUES (?, ?, ?, ?)
+        """, (caso_id, accion, fecha, usuario_id))
+        conn.commit()
+        conn.close()
 
     def obtener_investigadores(self):
         """Obtiene la lista de investigadores de la base de datos."""
@@ -68,22 +118,32 @@ class CasoInvestigacionModel(Subject):
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
+        # Traducir las etiquetas de los inputs a nombres de columnas
+        datos_traducidos = {
+            self.mapeo_etiquetas_a_columnas.get(etiqueta, etiqueta): valor
+            for etiqueta, valor in datos_actualizados.items()
+        }
+
         # Construir la consulta UPDATE dinámicamente
-        set_clausulas = ", ".join([f"{campo} = ?" for campo in datos_actualizados.keys()])
-        valores = list(datos_actualizados.values())
+        set_clausulas = ", ".join([f'"{columna}" = ?' for columna in datos_traducidos.keys()])  # Usar comillas dobles
+        valores = list(datos_traducidos.values())
         valores.append(nuevo_estatus)
         valores.append(nro_expediente)
 
-        cursor.execute(f"""
-            UPDATE Casos
-            SET {set_clausulas}, estatus = ?
-            WHERE nro_expediente = ?
-        """, valores)
+        try:
+            cursor.execute(f"""
+                UPDATE Casos
+                SET {set_clausulas}, estatus = ?
+                WHERE nro_expediente = ?
+            """, valores)
 
-        conn.commit()
-        conn.close()
-        self.notify(f"Caso {nro_expediente} modificado") # Notificamos el cambio
-        return True, "Caso modificado correctamente."
+            conn.commit()
+            conn.close()
+            self.notify(f"Caso {nro_expediente} modificado")  # Notificamos el cambio
+            return True, "Caso modificado correctamente."
+        except sqlite3.Error as e:
+            conn.close()
+            return False, f"Error al modificar el caso: {e}"
 
     def obtener_casos_cerrados(self, investigador_id=None, rol=None):
         """
@@ -130,20 +190,6 @@ class CasoInvestigacionModel(Subject):
         expedientes = [row[0] for row in cursor.fetchall()]
         conn.close()
         return expedientes
-
-
-    def asignar_investigador(self, nro_expediente, nombre_investigador, investigador_id):
-        """Asigna un investigador a un caso específico, cambia el estatus a 'Asignado' y guarda el nombre del investigador."""
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        cursor.execute("""
-            UPDATE Casos
-            SET investigador_id = ?, estatus = 'Asignado', investigador = ?
-            WHERE nro_expediente = ?
-        """, (investigador_id, nombre_investigador, nro_expediente))
-        conn.commit()
-        conn.close()
-        return True, "Investigador asignado correctamente."
 
 
     def obtener_casos_asignados(self, investigador_id):

@@ -170,6 +170,16 @@ class VentanaReportes(wx.Frame):
         conn.close()
         return resultados
 
+    def on_close(self, event):
+        """Maneja el cierre de la ventana."""
+        dialogo = wx.MessageDialog(self, "¿Estás seguro de que quieres salir?", "Cerrar aplicación", wx.YES_NO | wx.ICON_QUESTION)
+        respuesta = dialogo.ShowModal()
+        if respuesta == wx.ID_YES:
+            self.Destroy()  # Cierra la ventana
+            wx.Exit()  # Cierra la aplicación completamente
+        else:
+            event.Veto()  # Cancela el cierre de la ventana
+
 class VentanaMostrarReporte(wx.Frame):
     def __init__(self, parent, resultados, nombre_reporte):
         super(VentanaMostrarReporte, self).__init__(parent, title=f"Reporte: {nombre_reporte}", size=(800, 600))
@@ -200,13 +210,3 @@ class VentanaMostrarReporte(wx.Frame):
     def on_atras(self, event):
         """Maneja el clic en el botón 'Atrás'."""
         self.Hide()  # Cierra la ventana actual
-
-    def on_close(self, event):
-        """Maneja el cierre de la ventana."""
-        dialogo = wx.MessageDialog(self, "¿Estás seguro de que quieres salir?", "Cerrar aplicación", wx.YES_NO | wx.ICON_QUESTION)
-        respuesta = dialogo.ShowModal()
-        if respuesta == wx.ID_YES:
-            self.Destroy()  # Cierra la ventana
-            wx.Exit()  # Cierra la aplicación completamente
-        else:
-            event.Veto()  # Cancela el cierre de la ventana

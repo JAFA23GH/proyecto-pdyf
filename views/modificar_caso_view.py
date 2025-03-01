@@ -1,4 +1,5 @@
 import wx
+from datetime import datetime
 
 class VentanaModificar(wx.Frame):
     def __init__(self, parent, controlador, usuario, rol, menu_view=None):
@@ -14,6 +15,7 @@ class VentanaModificar(wx.Frame):
         panel = wx.ScrolledWindow(self)
         panel.SetScrollRate(5, 5)
         vbox = wx.BoxSizer(wx.VERTICAL)
+
 
         # Manejar el evento de cierre de la ventana
         self.Bind(wx.EVT_CLOSE, self.on_close)
@@ -94,24 +96,76 @@ class VentanaModificar(wx.Frame):
 
     def on_aceptar(self, event):
         from controllers.caso_controller import CasoController
-        from patterns.decorator import CasoDecorator  # Asegúrate de importar el decorador correctamente
+        from patterns.decorator import CasoDecorator
 
-        # Preguntar al usuario si desea realizar los cambios
         mensaje = '¿Está seguro de que desea realizar los cambios?'
         dialogo = wx.MessageDialog(None, mensaje, 'Confirmación', wx.YES_NO | wx.ICON_QUESTION)
         respuesta = dialogo.ShowModal()
 
         if respuesta == wx.ID_YES:
-            # Obtener el nro_expediente y los datos actualizados
             nro_expediente = self.nro_expediente_combo.GetValue()
             datos_actualizados = {campo: self.text_ctrls[campo].GetValue() for campo in self.text_ctrls}
             nuevo_estatus = self.estatus_combo.GetValue()
 
             self.controle = CasoController(self.usuario, self.rol, self.menu_view)
-            decorated_controller = CasoDecorator(self.controle)  # Envolver el controlador con el decorador
+            decorated_controller = CasoDecorator(self.controle)
 
-            # Usar el controlador decorado para modificar el caso
-            decorated_controller.modificar_caso(nro_expediente, datos_actualizados, nuevo_estatus)
+            # Obtener el id del caso a partir del número de expediente
+            caso_id = self.controle.obtener_id_caso_por_expediente(nro_expediente)
+            if not caso_id:
+                wx.MessageBox("No se pudo encontrar el ID del caso.", "Error", wx.OK | wx.ICON_ERROR)
+                return
+
+            # Modificar el caso
+            resultado = decorated_controller.modificar_caso(nro_expediente, datos_actualizados, nuevo_estatus)
+            if not resultado[0]:  # Si hubo un error al modificar el caso
+                wx.MessageBox(resultado[1], "Error", wx.OK | wx.ICON_ERROR)
+                return
+
+            # Obtener la fecha actual
+            fecha_actual = datetime.now().strftime('%Y-%m-%d')
+
+            # Insertar en la tabla Avances
+            descripcion_avances = datos_actualizados.get("Actuaciones/Acciones Realizadas", "")
+            if descripcion_avances:
+                self.controle.insertar_avance(caso_id, descripcion_avances, fecha_actual)
+
+            # Insertar en la tabla Alarmas si el caso se cierra o si se detectan frases clave
+            motivo_alarma = None
+            if nuevo_estatus == "Cerrado":
+                motivo_alarma = "Caso cerrado, requiere validación"
+            else:
+                frases_clave = [
+                    "Pruebas no concluyentes, revisar",
+                    "Denuncias crecientes, alta prioridad",
+                    "Posible interferencia en el caso",
+                    "Pruebas clave encontradas"
+                ]
+                for frase in frases_clave:
+                    if frase in descripcion_avances:
+                        motivo_alarma = frase
+                        break
+
+            if motivo_alarma:
+                self.controle.insertar_alarma(caso_id, motivo_alarma, fecha_actual)
+
+            # Insertar en la tabla Auditorias
+            accion_auditoria = datos_actualizados.get("Actuaciones/Acciones Realizadas", "")  # Usar el contenido del campo
+            self.controle.insertar_auditoria(caso_id, accion_auditoria, fecha_actual, self.usuario)
+
+            # Mostrar mensaje de confirmación
+            wx.MessageBox("Registro modificado exitosamente.", "Éxito", wx.OK | wx.ICON_INFORMATION)
+
+            # Limpiar los campos de la vista
+            self.limpiar_campos()
+
+    def limpiar_campos(self):
+        """Limpia todos los campos de la vista."""
+        self.nro_expediente_combo.SetValue("")  # Limpiar el ComboBox de expediente
+        for campo in self.text_ctrls:
+            self.text_ctrls[campo].SetValue("")  # Limpiar todos los campos de texto
+        self.estatus_combo.SetValue("Asignado")  # Restablecer el estatus a "Asignado"
+        self.boton_aceptar.Enable(False)  # Deshabilitar el botón de aceptar
 
     def on_cancel(self, event):
         self.Hide()  # Cierra la ventana de modificación

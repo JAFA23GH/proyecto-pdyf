@@ -92,7 +92,29 @@ class Database(metaclass=SingletonMeta):
             subtipo_irregularidad TEXT NOT NULL,
             procedencia_casos TEXT NOT NULL,
             FOREIGN KEY (investigador_id) REFERENCES Usuarios(id)  -- Relación con Usuarios
-        );"""
+            );""",
+            """ CREATE TABLE IF NOT EXISTS equipos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,  -- Identificador único (serial)
+                serial TEXT NOT NULL UNIQUE,          -- Número de serie del equipo
+                nombre TEXT NOT NULL,                 -- Nombre del equipo
+                tipo_equipo TEXT NOT NULL,            -- Tipo de equipo (ej: computadora, impresora, etc.)
+                marca TEXT NOT NULL,                  -- Marca del equipo
+                modelo TEXT NOT NULL,                 -- Modelo del equipo
+                observaciones TEXT,                    -- Observaciones adicionales (puede ser NULL)
+                fecha_adquisicion DATE, 
+                estado TEXT
+            );""",
+            """CREATE TABLE IF NOT EXISTS disciplinario (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,  -- Identificador único
+            usuario_id INTEGER NOT NULL,           -- Relación con la tabla Usuarios
+            equipo_id INTEGER NOT NULL,            -- Relación con la tabla equipos
+            estatus TEXT NOT NULL CHECK(estatus IN ('Amonestado', 'Suspendido')),  -- Estatus disciplinario
+            Estado_Equip TEXT NOT NULL CHECK(Estado_Equip IN ('N/A', 'Robado', 'Extraviado', 'Dañado')),  -- Estado del equipo
+            fecha_incidente DATE NOT NULL,         -- Fecha del incidente
+            descripcion TEXT,                      -- Descripción del incidente (opcional)
+            FOREIGN KEY (usuario_id) REFERENCES Usuarios(id) ON DELETE CASCADE,  -- Clave foránea a Usuarios
+            FOREIGN KEY (equipo_id) REFERENCES equipos(id) ON DELETE CASCADE     -- Clave foránea a equipos
+            );"""
         ]
         for table in tables:
             self.execute(table)
@@ -328,4 +350,88 @@ class Database(metaclass=SingletonMeta):
                         investigador_id, empresa, subtipo_ficha, tipo_irregularidad, 
                         subtipo_irregularidad, procedencia_casos
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", entidad
+                )
+
+            if not self.fetch_all("SELECT id FROM equipos LIMIT 1"):
+                """Inserta datos de ejemplo en la tabla Equipos."""
+            equipos = [
+                # Equipos de Investigación
+                ("ABC123", "Microscopio Electrónico", "Equipo de Investigación", "Zeiss", "Modelo X", "Equipo asignado al laboratorio de biología.", "2023-01-15", "Activo"),
+                ("DEF456", "Espectrómetro de Masas", "Equipo de Investigación", "Agilent", "5977B", "Equipo asignado al laboratorio de química.", "2022-09-12", "Activo"),
+                ("GHI789", "Cromatógrafo de Gases", "Equipo de Investigación", "Thermo Fisher", "Trace 1300", "Equipo utilizado en análisis químicos.", "2023-03-10", "Activo"),
+                ("JKL012", "Centrífuga de Alta Velocidad", "Equipo de Investigación", "Eppendorf", "Centrifuge 5430", "Equipo asignado al laboratorio de bioquímica.", "2021-11-01", "Activo"),
+                ("MNO345", "Termociclador (PCR)", "Equipo de Investigación", "Bio-Rad", "T100", "Equipo utilizado para amplificación de ADN.", "2023-02-25", "Activo"),
+                ("PQR678", "Analizador de ADN", "Equipo de Investigación", "Illumina", "MiSeq", "Equipo asignado al laboratorio de genética.", "2022-09-12", "Activo"),
+                ("STU901", "Estación Meteorológica", "Equipo de Investigación", "Davis Instruments", "Vantage Pro2", "Equipo utilizado para monitoreo climático.", "2023-04-05", "Activo"),
+                ("VWX234", "Equipo de Análisis de Suelos", "Equipo de Investigación", "Hanna Instruments", "HI9814", "Equipo asignado al laboratorio de agronomía.", "2022-12-18", "Activo"),
+                ("YZA567", "Cámara de Flujo Laminar", "Equipo de Investigación", "ESCO", "Class II", "Equipo asignado al laboratorio de microbiología.", "2023-06-30", "Activo"),
+                ("BCD890", "Espectrofotómetro UV-Vis", "Equipo de Investigación", "Shimadzu", "UV-1800", "Equipo utilizado en análisis espectroscópicos.", "2023-05-15", "Activo"),
+
+                # Equipos de Armamento
+                ("EFG123", "Rifle de Asalto", "Equipo de Armamento", "Colt", "M4", "Arma asignada al departamento de seguridad.", "2022-05-20", "Activo"),
+                ("HIJ456", "Pistola Semiautomática", "Equipo de Armamento", "Glock", "G17", "Arma asignada al personal de seguridad.", "2023-03-10", "Activo"),
+                ("KLM789", "Lanzagranadas", "Equipo de Armamento", "Heckler & Koch", "M320", "Equipo utilizado en operaciones tácticas.", "2021-11-01", "Activo"),
+                ("NOP012", "Mira Telescópica", "Equipo de Armamento", "Leupold", "Mark 5HD", "Accesorio para rifles de precisión.", "2023-02-25", "Activo"),
+                ("QRS345", "Chaleco Antibalas", "Equipo de Armamento", "Point Blank", "Alpha Elite", "Equipo de protección personal.", "2022-09-12", "Activo"),
+                ("TUV678", "Dron de Vigilancia", "Equipo de Armamento", "DJI", "Matrice 300", "Equipo utilizado para vigilancia aérea.", "2023-04-05", "Activo"),
+                ("WXY901", "Sistema de Comunicaciones Tácticas", "Equipo de Armamento", "Motorola", "APX 6000", "Equipo de comunicación para operaciones.", "2022-12-18", "Activo"),
+                ("ZAB234", "Granada de Mano", "Equipo de Armamento", "Rheinmetall", "DM51", "Equipo utilizado en operaciones tácticas.", "2023-06-30", "Activo"),
+                ("CDE567", "Escudo Antidisturbios", "Equipo de Armamento", "Protec", "Riot Shield", "Equipo de protección para control de multitudes.", "2023-05-15", "Activo"),
+                ("FGH890", "Equipo de Desactivación de Explosivos", "Equipo de Armamento", "iRobot", "PackBot", "Equipo utilizado en desactivación de artefactos explosivos.", "2023-01-15", "Activo"),
+
+                # Equipos de Decomiso
+                ("IJK123", "Escáner de Rayos X", "Equipo de Decomiso", "Smiths Detection", "HI-SCAN 6040", "Equipo utilizado en controles de seguridad.", "2022-05-20", "Activo"),
+                ("LMN456", "Detector de Metales", "Equipo de Decomiso", "Garrett", "ACE 300", "Equipo utilizado en controles de seguridad.", "2023-03-10", "Activo"),
+                ("OPQ789", "Equipo de Análisis de Drogas", "Equipo de Decomiso", "Thermo Fisher", "TruNarc", "Equipo utilizado en análisis de sustancias controladas.", "2021-11-01", "Activo"),
+                ("RST012", "Kit de Pruebas de Sustancias Controladas", "Equipo de Decomiso", "NarcoCheck", "Basic Kit", "Equipo utilizado en controles de narcóticos.", "2023-02-25", "Activo"),
+                ("UVW345", "Báscula de Precisión", "Equipo de Decomiso", "Ohaus", "Explorer Pro", "Equipo utilizado para pesar sustancias decomisadas.", "2022-09-12", "Activo"),
+                ("XYZ678", "Equipo de Inspección de Vehículos", "Equipo de Decomiso", "VMI", "MobileScan", "Equipo utilizado en inspección de vehículos.", "2023-04-05", "Activo"),
+                ("ABC901", "Detector de Billetes Falsos", "Equipo de Decomiso", "Cassida", "6600", "Equipo utilizado en detección de billetes falsificados.", "2022-12-18", "Activo"),
+                ("DEF234", "Equipo de Análisis de Armas de Fuego", "Equipo de Decomiso", "Bruker", "CTX", "Equipo utilizado en análisis de armas decomisadas.", "2023-06-30", "Activo"),
+                ("GHI567", "Escáner Portátil de Equipaje", "Equipo de Decomiso", "Rapiscan", "620XR", "Equipo utilizado en inspección de equipaje.", "2023-05-15", "Activo"),
+                ("JKL890", "Kit de Pruebas de Explosivos", "Equipo de Decomiso", "FLIR", "Fido X3", "Equipo utilizado en detección de explosivos.", "2023-01-15", "Activo"),
+
+                # Equipos de Oficina
+                ("MNO123", "Computadora de Escritorio", "Equipo de Oficina", "Dell", "OptiPlex 7070", "Equipo asignado al departamento de TI.", "2021-11-01", "Activo"),
+                ("PQR456", "Laptop", "Equipo de Oficina", "HP", "EliteBook 840", "Equipo asignado al personal administrativo.", "2023-03-10", "Activo"),
+                ("STU789", "Impresora Multifuncional", "Equipo de Oficina", "Canon", "imageRUNNER ADVANCE", "Equipo asignado al área administrativa.", "2022-05-20", "Activo"),
+                ("VWX012", "Proyector de Video", "Equipo de Oficina", "Epson", "PowerLite 1781W", "Equipo utilizado en presentaciones.", "2023-02-25", "Activo"),
+                ("YZA345", "Teléfono IP", "Equipo de Oficina", "Cisco", "IP Phone 8845", "Equipo asignado al departamento de comunicaciones.", "2022-09-12", "Activo"),
+                ("BCD678", "Escáner de Documentos", "Equipo de Oficina", "Fujitsu", "ScanSnap iX1500", "Equipo utilizado para digitalización de documentos.", "2023-04-05", "Activo"),
+                ("EFG901", "Fotocopiadora", "Equipo de Oficina", "Xerox", "WorkCentre 6515", "Equipo asignado al área administrativa.", "2022-12-18", "Activo"),
+                ("HIJ234", "Pizarra Interactiva", "Equipo de Oficina", "SMART", "SBX885", "Equipo utilizado en salas de reuniones.", "2023-06-30", "Activo"),
+                ("KLM567", "Equipo de Videoconferencia", "Equipo de Oficina", "Logitech", "Rally Plus", "Equipo utilizado para videoconferencias.", "2023-05-15", "Activo"),
+                ("NOP890", "Router Wi-Fi", "Equipo de Oficina", "TP-Link", "Archer AX6000", "Equipo asignado al departamento de TI.", "2023-01-15", "Activo"),
+
+                # Equipos Médicos
+                ("QRS123", "Monitor de Signos Vitales", "Equipo Médico", "Philips", "IntelliVue MX40", "Equipo utilizado en la sala de emergencias.", "2023-02-25", "Activo"),
+                ("TUV456", "Desfibrilador", "Equipo Médico", "Zoll", "AED Plus", "Equipo utilizado en emergencias cardíacas.", "2022-09-12", "Activo"),
+                ("WXY789", "Máquina de Anestesia", "Equipo Médico", "GE Healthcare", "Aisys CS2", "Equipo utilizado en cirugías.", "2023-04-05", "Activo"),
+                ("ZAB012", "Equipo de Rayos X Portátil", "Equipo Médico", "Siemens", "Mobilett Mira", "Equipo utilizado en radiología móvil.", "2022-12-18", "Activo"),
+                ("CDE345", "Bomba de Infusión", "Equipo Médico", "Baxter", "Sigma Spectrum", "Equipo utilizado en administración de medicamentos.", "2023-06-30", "Activo"),
+                ("FGH678", "Estetoscopio Digital", "Equipo Médico", "Eko", "CORE Digital", "Equipo utilizado en auscultación.", "2023-05-15", "Activo"),
+                ("IJK901", "Equipo de Ultrasonido", "Equipo Médico", "Samsung", "HS50", "Equipo utilizado en diagnóstico por imágenes.", "2023-01-15", "Activo"),
+                ("LMN234", "Cámara Hiperbárica", "Equipo Médico", "Sechrist", "3200H", "Equipo utilizado en terapia hiperbárica.", "2022-05-20", "Activo"),
+                ("OPQ567", "Equipo de Diálisis", "Equipo Médico", "Fresenius", "4008S", "Equipo utilizado en tratamientos de diálisis.", "2023-03-10", "Activo"),
+                ("RST890", "Ventilador Mecánico", "Equipo Médico", "Medtronic", "Puritan Bennett 980", "Equipo utilizado en cuidados intensivos.", "2021-11-01", "Activo"),
+
+                # Equipos de Laboratorio
+                ("UVW123", "Autoclave", "Equipo de Laboratorio", "Tuttnauer", "3870E", "Equipo utilizado en esterilización.", "2023-02-25", "Activo"),
+                ("XYZ456", "Agitador Magnético", "Equipo de Laboratorio", "IKA", "RH Basic 2", "Equipo utilizado en mezclas de líquidos.", "2022-09-12", "Activo"),
+                ("ABC789", "Baño María", "Equipo de Laboratorio", "Memmert", "WB22", "Equipo utilizado en calentamiento de muestras.", "2023-04-05", "Activo"),
+                ("DEF012", "Microscopio Óptico", "Equipo de Laboratorio", "Olympus", "CX23", "Equipo utilizado en observación de muestras.", "2022-12-18", "Activo"),
+                ("GHI345", "Balanza Analítica", "Equipo de Laboratorio", "Mettler Toledo", "ME204E", "Equipo utilizado en mediciones precisas.", "2023-06-30", "Activo"),
+                ("JKL678", "pH-metro", "Equipo de Laboratorio", "Hanna Instruments", "HI2210", "Equipo utilizado en medición de pH.", "2023-05-15", "Activo"),
+                ("MNO901", "Estufa de Secado", "Equipo de Laboratorio", "Binder", "FD 115", "Equipo utilizado en secado de muestras.", "2023-01-15", "Activo"),
+                ("PQR234", "Congelador de -80°C", "Equipo de Laboratorio", "Thermo Fisher", "ULT1386", "Equipo utilizado en almacenamiento de muestras.", "2022-05-20", "Activo"),
+                ("STU567", "Campana de Extracción de Gases", "Equipo de Laboratorio", "ESCO", "SafeAire 2", "Equipo utilizado en manipulación de sustancias químicas.", "2023-03-10", "Activo"),
+                ("VWX890", "Vortex", "Equipo de Laboratorio", "Scientific Industries", "Vortex-Genie 2", "Equipo utilizado en mezclas de líquidos.", "2021-11-01", "Activo")
+            ]
+
+
+            for equipo in equipos:
+                self.execute(
+                    """INSERT INTO equipos (serial, nombre, tipo_equipo, marca, modelo, observaciones, fecha_adquisicion, estado)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    """, equipo
                 )

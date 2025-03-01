@@ -135,6 +135,22 @@ class CasoController:
 
         return lista_expedientes + lista_alarmas
 
+    def obtener_id_caso_por_expediente(self, nro_expediente):
+        """Obtiene el id de la tabla Casos a partir del número de expediente."""
+        return self.modelo.obtener_id_caso_por_expediente(nro_expediente)
+
+    def insertar_avance(self, caso_id, descripcion, fecha):
+        """Inserta un registro en la tabla Avances."""
+        return self.modelo.insertar_avance(caso_id, descripcion, fecha)
+
+    def insertar_alarma(self, caso_id, motivo, fecha):
+        """Inserta un registro en la tabla Alarmas."""
+        return self.modelo.insertar_alarma(caso_id, motivo, fecha)
+
+    def insertar_auditoria(self, caso_id, accion, fecha, usuario_id):
+        """Inserta un registro en la tabla Auditorias."""
+        return self.modelo.insertar_auditoria(caso_id, accion, fecha, usuario_id)
+
 
     def obtener_casos_cerrados(self, investigador_id):
         """Obtiene la lista de casos desde el modelo."""
