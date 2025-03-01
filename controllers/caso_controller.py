@@ -1,17 +1,18 @@
-from patterns.factory import ModelFactory
 from views.caso_view import VentanaRegistro
 from views.asignar_caso_view import VentanaAsignar
 from views.cerrar_caso_view import VentanaCerrarCaso
 from views.genera_rerporte_view import VentanaReportes
 from views.modificar_caso_view import VentanaModificar
+from views.reabrir_caso_view import VentanaReabrir
+from views.visualizar_alarma_py import VentanaVisAlarma
+from views.gestionar_entidades_view import VentanaGestionarEntidades
 
+from patterns.factory import ModelFactory
 from patterns.observer import CasoObserver
 from datetime import datetime
 import wx
 
-from views.reabrir_caso_view import VentanaReabrir
-from views.visualizar_alarma_py import VentanaVisAlarma
-from views.gestionar_entidades_view import VentanaGestionarEntidades
+
 
 class CasoController:
     def __init__(self, user_id, rol, menu_view):
@@ -125,6 +126,18 @@ class CasoController:
     def obtener_casos_abiertos(self, investigador_id):
         """Obtiene la lista de casos desde el modelo."""
         return self.modelo.obtener_casos_abiertos(investigador_id)
+
+    def obtener_casos_abiertos1(self, investigador_id=None):
+        """Obtiene la lista de casos abiertos y de alarmas desde el modelo."""
+        casos_abiertos = self.modelo.obtener_casos_abiertos(investigador_id)
+        casos_alarmas = self.modelo.obtener_casos_con_alarmas()
+
+        # Formatear la lista con etiquetas
+        lista_expedientes = [f"{caso} (Caso sin asignar)" for caso in casos_abiertos]
+        lista_alarmas = [f"{alarma} (Otra causa)" for alarma in casos_alarmas]
+
+        return lista_expedientes + lista_alarmas
+
 
     def obtener_casos_cerrados(self, investigador_id):
         """Obtiene la lista de casos desde el modelo."""

@@ -11,6 +11,9 @@ class VentanaGestionarEntidades(wx.Frame):
                          "Tipo de Irregularidad", "Subtipo de Irregularidad", "Procedencia Casos"]
         
         self.InitUI()
+
+        # Manejar el evento de cierre de la ventana
+        self.Bind(wx.EVT_CLOSE, self.on_close)
     
     def InitUI(self):
         panel = wx.Panel(self)
@@ -165,4 +168,14 @@ class EntityDialog(wx.Dialog):
     
     def OnCancel(self, event):
         self.Destroy()
+
+    def on_close(self, event):
+        """Maneja el cierre de la ventana."""
+        dialogo = wx.MessageDialog(self, "¿Estás seguro de que quieres salir?", "Cerrar aplicación", wx.YES_NO | wx.ICON_QUESTION)
+        respuesta = dialogo.ShowModal()
+        if respuesta == wx.ID_YES:
+            self.Destroy()  # Cierra la ventana
+            wx.Exit()  # Cierra la aplicación completamente
+        else:
+            event.Veto()  # Cancela el cierre de la ventana
 

@@ -118,7 +118,19 @@ class CasoInvestigacionModel(Subject):
         conn.close()
         return expedientes
 
-    import sqlite3
+    def obtener_casos_con_alarmas(self):
+        """Obtiene los expedientes de la tabla Alarmas y los relaciona con los casos."""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT c.nro_expediente 
+            FROM Alarmas a
+            JOIN Casos c ON a.caso_id = c.id
+        """)
+        expedientes = [row[0] for row in cursor.fetchall()]
+        conn.close()
+        return expedientes
+
 
     def asignar_investigador(self, nro_expediente, nombre_investigador, investigador_id):
         """Asigna un investigador a un caso específico, cambia el estatus a 'Asignado' y guarda el nombre del investigador."""
@@ -155,6 +167,7 @@ class CasoInvestigacionModel(Subject):
             # Asumiendo que el resultado es una fila con los datos del caso
             return {
                 "Tipo de Caso": resultado[0][1],
+                "Investigador":  resultado[0][3],
                 "Fecha de inicio": resultado[0][4],
                 "Móvil afectado": resultado[0][5],
                 "Tipo de irregularidad": resultado[0][6],

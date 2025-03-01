@@ -13,6 +13,9 @@ class LoginView(wx.Frame):
 
         self.InitUI()
 
+        # Manejar el evento de cierre de la ventana
+        self.Bind(wx.EVT_CLOSE, self.on_close)
+
     def InitUI(self):
         panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -60,6 +63,12 @@ class LoginView(wx.Frame):
         # Llamar al controlador para validar el login
         self.controller.validar_login(usuario, contraseña)
 
-    def on_enter(self, event):
-        """Maneja el evento de enfoque al presionar Enter en el botón."""
-        event.Skip()  # Permite que el evento continúe
+    def on_close(self, event):
+        """Maneja el cierre de la ventana."""
+        dialogo = wx.MessageDialog(self, "¿Estás seguro de que quieres salir?", "Cerrar aplicación", wx.YES_NO | wx.ICON_QUESTION)
+        respuesta = dialogo.ShowModal()
+        if respuesta == wx.ID_YES:
+            self.Destroy()  # Cierra la ventana
+            wx.Exit()  # Cierra la aplicación completamente
+        else:
+            event.Veto()  # Cancela el cierre de la ventana

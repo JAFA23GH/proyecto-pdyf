@@ -13,8 +13,8 @@ class VentanaCerrarCaso(wx.Frame):
 
         self.InitUI()
 
-        # Vincular el evento de cierre de la ventana
-        self.Bind(wx.EVT_CLOSE, self.OnClose)
+        # Manejar el evento de cierre de la ventana
+        self.Bind(wx.EVT_CLOSE, self.on_close)
 
     def InitUI(self):
         pnl = wx.Panel(self)
@@ -101,10 +101,15 @@ class VentanaCerrarCaso(wx.Frame):
 
     def OnCancel(self, event):
         # Lógica para cancelar y cerrar la ventana
-        self.Close()
+        self.Hide()
         self.controlador.menu_view.reopen()
 
-    def OnClose(self, event):
-        """Evento que se ejecuta cuando se intenta cerrar la ventana."""
-        # Cerrar la ventana
-        self.Destroy()
+    def on_close(self, event):
+        """Maneja el cierre de la ventana."""
+        dialogo = wx.MessageDialog(self, "¿Estás seguro de que quieres salir?", "Cerrar aplicación", wx.YES_NO | wx.ICON_QUESTION)
+        respuesta = dialogo.ShowModal()
+        if respuesta == wx.ID_YES:
+            self.Destroy()  # Cierra la ventana
+            wx.Exit()  # Cierra la aplicación completamente
+        else:
+            event.Veto()  # Cancela el cierre de la ventana

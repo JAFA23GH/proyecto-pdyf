@@ -14,6 +14,9 @@ class VentanaAsignar(wx.Frame):
         panel.SetScrollRate(5, 5)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
+        # Manejar el evento de cierre de la ventana
+        self.Bind(wx.EVT_CLOSE, self.on_close)
+
         # Cambiar el icono de la ventana
         icon = wx.Icon("img/iconoinstitucional.ico", wx.BITMAP_TYPE_ICO)  # Cambia la ruta al icono
         self.SetIcon(icon)
@@ -142,5 +145,15 @@ class VentanaAsignar(wx.Frame):
         self.nro_expediente_combo.SetValue("")
 
     def on_cancel(self, event):
-        self.Close()  # Cierra la ventana de asignación
+        self.Hide()  # Cierra la ventana de asignación
         self.controlador.menu_view.reopen()
+
+    def on_close(self, event):
+        """Maneja el cierre de la ventana."""
+        dialogo = wx.MessageDialog(self, "¿Estás seguro de que quieres salir?", "Cerrar aplicación", wx.YES_NO | wx.ICON_QUESTION)
+        respuesta = dialogo.ShowModal()
+        if respuesta == wx.ID_YES:
+            self.Destroy()  # Cierra la ventana
+            wx.Exit()  # Cierra la aplicación completamente
+        else:
+            event.Veto()  # Cancela el cierre de la ventana

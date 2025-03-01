@@ -15,6 +15,9 @@ class VentanaReabrir(wx.Frame):
         panel.SetScrollRate(5, 5)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
+        # Manejar el evento de cierre de la ventana
+        self.Bind(wx.EVT_CLOSE, self.on_close)
+
         icon = wx.Icon("img/iconoinstitucional.ico", wx.BITMAP_TYPE_ICO)
         self.SetIcon(icon)
 
@@ -103,5 +106,15 @@ class VentanaReabrir(wx.Frame):
             decorated_controller.modificar_caso(nro_expediente, datos_actualizados, nuevo_estatus)
 
     def on_cancel(self, event):
-        self.Close()
+        self.Hide()
         self.controlador.menu_view.reopen()
+
+    def on_close(self, event):
+        """Maneja el cierre de la ventana."""
+        dialogo = wx.MessageDialog(self, "¿Estás seguro de que quieres salir?", "Cerrar aplicación", wx.YES_NO | wx.ICON_QUESTION)
+        respuesta = dialogo.ShowModal()
+        if respuesta == wx.ID_YES:
+            self.Destroy()  # Cierra la ventana
+            wx.Exit()  # Cierra la aplicación completamente
+        else:
+            event.Veto()  # Cancela el cierre de la ventana

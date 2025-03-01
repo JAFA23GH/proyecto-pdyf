@@ -13,6 +13,9 @@ class VentanaReportes(wx.Frame):
         self.menu_view = menu_view  # Guardar la referencia al menú principal
         self.SetTitle("Generar Reporte")
 
+        # Manejar el evento de cierre de la ventana
+        self.Bind(wx.EVT_CLOSE, self.on_close)
+
         # Crear un panel con scroll
         self.scroll_panel = scrolled.ScrolledPanel(self, style=wx.VSCROLL)
         self.scroll_panel.SetupScrolling()  # Habilitar el scroll
@@ -196,4 +199,14 @@ class VentanaMostrarReporte(wx.Frame):
 
     def on_atras(self, event):
         """Maneja el clic en el botón 'Atrás'."""
-        self.Close()  # Cierra la ventana actual
+        self.Hide()  # Cierra la ventana actual
+
+    def on_close(self, event):
+        """Maneja el cierre de la ventana."""
+        dialogo = wx.MessageDialog(self, "¿Estás seguro de que quieres salir?", "Cerrar aplicación", wx.YES_NO | wx.ICON_QUESTION)
+        respuesta = dialogo.ShowModal()
+        if respuesta == wx.ID_YES:
+            self.Destroy()  # Cierra la ventana
+            wx.Exit()  # Cierra la aplicación completamente
+        else:
+            event.Veto()  # Cancela el cierre de la ventana
