@@ -1,5 +1,6 @@
 from controllers.investigador_controller import GestionarUsuariosController
 from controllers.caso_controller import CasoController
+from controllers.entidades_controller import GestionarEntidadesController
 import wx
 
 class MenuView(wx.Frame):
@@ -73,6 +74,9 @@ class MenuView(wx.Frame):
         opcion = button.GetLabel()
         self.controlador = CasoController(user_id=self.user_id, rol=self.rol, menu_view=self)
         self.controlador1 = GestionarUsuariosController(menu_view=self)
+        self.controlador2 = GestionarEntidadesController(menu_view=self)
+
+
         if opcion == "Registrar caso de investigación":
             self.Hide()  # Oculta la ventana del menú principal
             self.controlador.mostrar_ventana(vista="registro")
@@ -96,7 +100,7 @@ class MenuView(wx.Frame):
             self.controlador.mostrar_ventana(vista="Cerrar")
         elif opcion == "Gestionar entidades":
             self.Hide()  # Oculta la ventana del menú principal
-            self.controlador.mostrar_ventana(vista="Gestionar")
+            self.controlador2.mostrar_ventana(vista="Gestionar")
         elif opcion == "Gestionar Investigadores":
             self.Hide()  # Oculta la ventana del menú principal
             self.controlador1.mostrar_ventana(vista="GestionarUser")

@@ -5,7 +5,6 @@ from views.genera_rerporte_view import VentanaReportes
 from views.modificar_caso_view import VentanaModificar
 from views.reabrir_caso_view import VentanaReabrir
 from views.visualizar_alarma_py import VentanaVisAlarma
-from views.gestionar_entidades_view import VentanaGestionarEntidades
 
 from patterns.factory import ModelFactory
 from patterns.observer import CasoObserver
@@ -38,8 +37,6 @@ class CasoController:
             self.ventana = VentanaReabrir(None, controlador=self, usuario=self.user_id, rol=self.rol)
         elif vista == "Cerrar":
             self.ventana = VentanaCerrarCaso(None, controlador=self, usuario=self.user_id, rol=self.rol)
-        elif vista == "Gestionar":
-            self.ventana = VentanaGestionarEntidades(None, controlador=self, usuario=self.user_id, rol=self.rol)
         self.ventana.Show()
 
     def obtener_casos_asignados(self, usuario):

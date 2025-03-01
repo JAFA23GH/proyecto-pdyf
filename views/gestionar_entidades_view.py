@@ -1,181 +1,206 @@
 import wx
+from wx.grid import Grid
 
 class VentanaGestionarEntidades(wx.Frame):
-    def __init__(self, parent, controlador, usuario, rol, *args, **kw):
-        super(VentanaGestionarEntidades, self).__init__(parent, title="Gestionar Entidades", size=(600, 400), *args, **kw)
-        self.controlador = controlador
-        self.usuario = usuario
-        self.rol = rol
-        self.entities = ["Tipo de Brecha", "Tipo de Proyecto", "Procesos Corregidos", 
-                         "Procesos Realizados", "Investigadores", "Empresas", "Subtipo de Ficha", 
-                         "Tipo de Irregularidad", "Subtipo de Irregularidad", "Procedencia Casos"]
-        
-        self.InitUI()
+    def __init__(self, parent, controller, menu_view=None, *args, **kw):
+        super(VentanaGestionarEntidades, self).__init__(parent, *args, **kw)
+        self.controller = controller
+        self.menu_view = menu_view
+        self.SetTitle("Gestión de Entidades")
+        self.SetSize((800, 500))
 
-        # Manejar el evento de cierre de la ventana
+        self.InitUI()
+        self.Centre()
         self.Bind(wx.EVT_CLOSE, self.on_close)
-    
+
     def InitUI(self):
         panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
-        
-        # Entity Selector
-        hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-        entity_lbl = wx.StaticText(panel, label="Seleccione la entidad a gestionar:")
-        hbox1.Add(entity_lbl, flag=wx.RIGHT, border=8)
-        self.entity_choice = wx.Choice(panel, choices=self.entities)
-        self.entity_choice.Bind(wx.EVT_CHOICE, self.OnEntitySelected)
-        hbox1.Add(self.entity_choice, proportion=1)
-        vbox.Add(hbox1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
-        
-        # Placeholder for dynamic content
-        self.dynamic_panel = wx.Panel(panel)
-        vbox.Add(self.dynamic_panel, proportion=1, flag=wx.EXPAND | wx.ALL, border=10)
-        
-        panel.SetSizer(vbox)
-        self.Centre()
-        self.Show()
-    
-    def OnEntitySelected(self, event):
-        entity = self.entity_choice.GetStringSelection()
-        self.LoadEntityManagementUI(entity)
-    
-    def LoadEntityManagementUI(self, entity):
-        # Clear existing content
-        for child in self.dynamic_panel.GetChildren():
-            child.Destroy()
-        
-        # Create new content based on selected entity
-        vbox = wx.BoxSizer(wx.VERTICAL)
-        
-        # Fetch records for the selected entity
-        records = self.GetEntityRecords(entity)
-        
-        # Record List
-        self.record_list = wx.ListCtrl(self.dynamic_panel, style=wx.LC_REPORT)
-        self.record_list.InsertColumn(0, 'ID', width=50)
-        self.record_list.InsertColumn(1, 'Nombre', width=200)
-        for idx, record in enumerate(records):
-            self.record_list.InsertItem(idx, str(record['id']))
-            self.record_list.SetItem(idx, 1, record['name'])
-        vbox.Add(self.record_list, proportion=1, flag=wx.EXPAND | wx.BOTTOM, border=10)
-        
-        # Action Buttons
-        hbox = wx.BoxSizer(wx.HORIZONTAL)
-        add_btn = wx.Button(self.dynamic_panel, label='Agregar')
-        add_btn.Bind(wx.EVT_BUTTON, lambda event: self.OnAddRecord(entity))
-        hbox.Add(add_btn, flag=wx.RIGHT, border=5)
-        edit_btn = wx.Button(self.dynamic_panel, label='Editar')
-        edit_btn.Bind(wx.EVT_BUTTON, lambda event: self.OnEditRecord(entity))
-        hbox.Add(edit_btn, flag=wx.RIGHT, border=5)
-        delete_btn = wx.Button(self.dynamic_panel, label='Eliminar')
-        delete_btn.Bind(wx.EVT_BUTTON, lambda event: self.OnDeleteRecord(entity))
-        hbox.Add(delete_btn)
-        vbox.Add(hbox, flag=wx.ALIGN_CENTER)
-        
-        self.dynamic_panel.SetSizer(vbox)
-        self.dynamic_panel.Layout()
-    
-    def GetEntityRecords(self, entity):
-        # Placeholder method to get records from the database or data source
-        # For now, return dummy data
-        dummy_data = [{'id': 1, 'name': f'{entity} A'}, {'id': 2, 'name': f'{entity} B'}]
-        return dummy_data
-    
-    def OnAddRecord(self, entity):
-        dlg = EntityDialog(self, title=f"Agregar {entity}", entity=entity)
-        dlg.ShowModal()
-        dlg.Destroy()
-        # Refresh the UI after adding
-        self.LoadEntityManagementUI(entity)
-    
-    def OnEditRecord(self, entity):
-        selected_item = self.record_list.GetFirstSelected()
-        if selected_item == -1:
-            wx.MessageBox('Seleccione un registro para editar.', 'Error', wx.OK | wx.ICON_ERROR)
-            return
-        record_id = int(self.record_list.GetItemText(selected_item))
-        dlg = EntityDialog(self, title=f"Editar {entity}", entity=entity, record_id=record_id)
-        dlg.ShowModal()
-        dlg.Destroy()
-        # Refresh the UI after editing
-        self.LoadEntityManagementUI(entity)
-    
-    def OnDeleteRecord(self, entity):
-        selected_item = self.record_list.GetFirstSelected()
-        if selected_item == -1:
-            wx.MessageBox('Seleccione un registro para eliminar.', 'Error', wx.OK | wx.ICON_ERROR)
-            return
-        record_id = int(self.record_list.GetItemText(selected_item))
-        # Implement deletion logic here
-        confirm = wx.MessageBox(f'¿Está seguro de eliminar el registro {record_id}?', 'Confirmar', wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-        if confirm == wx.YES:
-            # Delete the record
-            wx.MessageBox('Registro eliminado.', 'Información', wx.OK | wx.ICON_INFORMATION)
-            self.LoadEntityManagementUI(entity)
 
-class EntityDialog(wx.Dialog):
-    def __init__(self, parent, title, entity, record_id=None):
-        super(EntityDialog, self).__init__(parent, title=title, size=(350, 250))
-        
-        self.entity = entity
-        self.record_id = record_id
-        self.is_edit = record_id is not None
-        
-        self.InitUI()
-        if self.is_edit:
-            self.LoadRecordData()
-        
-    def InitUI(self):
-        vbox = wx.BoxSizer(wx.VERTICAL)
-        
-        # Depending on the entity, define the fields. For simplicity, let's assume each entity has only a 'name' field.
-        lbl = wx.StaticText(self, label="Nombre:")
-        vbox.Add(lbl, flag=wx.LEFT | wx.TOP, border=10)
-        self.name_txt = wx.TextCtrl(self)
-        vbox.Add(self.name_txt, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
-        
-        # Action Buttons
+        # Grid para mostrar las entidades
+        self.grid = Grid(panel)
+        self.grid.CreateGrid(0, 9)  # 9 columnas según la estructura de la tabla
+        self.grid.SetColLabelValue(0, "ID")
+        self.grid.SetColLabelValue(1, "Tipo Brecha")
+        self.grid.SetColLabelValue(2, "Tipo Proyecto")
+        self.grid.SetColLabelValue(3, "Proceso Corregido")
+        self.grid.SetColLabelValue(4, "Proceso Realizado")
+        self.grid.SetColLabelValue(5, "Investigador ID")
+        self.grid.SetColLabelValue(6, "Empresa")
+        self.grid.SetColLabelValue(7, "Subtipo Ficha")
+        self.grid.SetColLabelValue(8, "Tipo Irregularidad")
+        vbox.Add(self.grid, 1, wx.EXPAND | wx.ALL, 10)
+
+        # Botones para CRUD
         hbox = wx.BoxSizer(wx.HORIZONTAL)
-        save_btn = wx.Button(self, label='Guardar')
-        save_btn.Bind(wx.EVT_BUTTON, self.OnSave)
-        hbox.Add(save_btn, flag=wx.RIGHT, border=5)
-        cancel_btn = wx.Button(self, label='Cancelar')
-        cancel_btn.Bind(wx.EVT_BUTTON, self.OnCancel)
-        hbox.Add(cancel_btn)
+        btn_agregar = wx.Button(panel, label="Agregar")
+        btn_editar = wx.Button(panel, label="Editar")
+        btn_eliminar = wx.Button(panel, label="Eliminar")
+        btn_cancelar = wx.Button(panel, label="Cancelar")
+        hbox.Add(btn_agregar)
+        hbox.Add(btn_editar, flag=wx.LEFT, border=5)
+        hbox.Add(btn_eliminar, flag=wx.LEFT, border=5)
+        hbox.Add(btn_cancelar, flag=wx.LEFT, border=5)
         vbox.Add(hbox, flag=wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM, border=10)
-        
-        self.SetSizer(vbox)
-    
-    def LoadRecordData(self):
-        # Load data for the record with self.record_id
-        # This is a placeholder. Replace with actual data retrieval.
-        record = {'id': self.record_id, 'name': f'{self.entity} Nombre'}
-        self.name_txt.SetValue(record['name'])
-    
-    def OnSave(self, event):
-        name = self.name_txt.GetValue()
-        if not name:
-            wx.MessageBox('El campo "Nombre" es obligatorio.', 'Error', wx.OK | wx.ICON_ERROR)
-            return
-        if self.is_edit:
-            # Update the record
-            wx.MessageBox('Registro actualizado exitosamente.', 'Información', wx.OK | wx.ICON_INFORMATION)
-        else:
-            # Create a new record
-            wx.MessageBox('Registro creado exitosamente.', 'Información', wx.OK | wx.ICON_INFORMATION)
-        self.Destroy()
-    
-    def OnCancel(self, event):
-        self.Destroy()
+
+        # Eventos de los botones
+        btn_agregar.Bind(wx.EVT_BUTTON, self.on_agregar)
+        btn_editar.Bind(wx.EVT_BUTTON, self.on_editar)
+        btn_eliminar.Bind(wx.EVT_BUTTON, self.on_eliminar)
+        btn_cancelar.Bind(wx.EVT_BUTTON, self.on_cancelar)
+
+        panel.SetSizer(vbox)
+        self.cargar_entidades()
+
+    def cargar_entidades(self):
+        entidades = self.controller.obtener_entidades()  # Suponiendo que devuelve una lista de listas o tuplas
+
+        # Asegúrate de que el grid tiene suficientes filas y columnas
+        self.grid.ClearGrid()
+
+        if self.grid.GetNumberRows() < len(entidades):
+            self.grid.AppendRows(len(entidades) - self.grid.GetNumberRows())
+
+        if self.grid.GetNumberCols() < len(entidades[0]):
+            self.grid.AppendCols(len(entidades[0]) - self.grid.GetNumberCols())
+
+        # Rellena el grid con los datos
+        for i, entidad in enumerate(entidades):
+            for j, dato in enumerate(entidad):
+                self.grid.SetCellValue(i, j, str(dato))
+
+    def on_agregar(self, event):
+        """Abre un diálogo para agregar una nueva entidad."""
+        dialog = wx.Dialog(self, title="Agregar Entidad", size=(400, 300))
+
+        # Crear un ScrolledWindow
+        scrolled_window = wx.ScrolledWindow(dialog)
+        scrolled_window.SetScrollRate(10, 10)  # Velocidad del scroll
+
+        # Crear un panel dentro del ScrolledWindow
+        panel = wx.Panel(scrolled_window)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+
+        # Campos del formulario
+        campos = [
+            ("Tipo Brecha", wx.TextCtrl(panel)),
+            ("Tipo Proyecto", wx.TextCtrl(panel)),
+            ("Proceso Corregido", wx.TextCtrl(panel)),
+            ("Proceso Realizado", wx.TextCtrl(panel)),
+            ("Investigador ID", wx.TextCtrl(panel)),
+            ("Empresa", wx.TextCtrl(panel)),
+            ("Subtipo Ficha", wx.TextCtrl(panel)),
+            ("Tipo Irregularidad", wx.TextCtrl(panel))
+        ]
+
+        for label, control in campos:
+            vbox.Add(wx.StaticText(panel, label=label), flag=wx.TOP | wx.LEFT, border=5)
+            vbox.Add(control, flag=wx.EXPAND | wx.ALL, border=5)
+
+        # Botones de acción
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        btn_aceptar = wx.Button(panel, label="Aceptar", id=wx.ID_OK)
+        btn_cancelar = wx.Button(panel, label="Cancelar", id=wx.ID_CANCEL)
+        hbox.Add(btn_aceptar)
+        hbox.Add(btn_cancelar, flag=wx.LEFT, border=5)
+
+        vbox.Add(hbox, flag=wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM, border=10)
+
+        # Asignar el sizer al panel
+        panel.SetSizer(vbox)
+
+        # Ajustar el tamaño del ScrolledWindow para que se active el scroll si es necesario
+        scrolled_window.SetSizer(wx.BoxSizer())
+        scrolled_window.GetSizer().Add(panel, 1, wx.EXPAND)
+        scrolled_window.FitInside()  # Ajustar el contenido dentro del ScrolledWindow
+
+        # Mostrar el diálogo y manejar la respuesta
+        resultado = dialog.ShowModal()
+        if resultado == wx.ID_OK:
+            datos = [control.GetValue() for _, control in campos]
+            self.controller.agregar_entidad(*datos)
+            self.cargar_entidades()
+        dialog.Destroy()
+
+    def on_editar(self, event):
+        """Abre un diálogo para editar una entidad."""
+        selected_row = self.grid.GetGridCursorRow()
+        if selected_row >= 0:
+            entidad_id = self.grid.GetCellValue(selected_row, 0)
+            datos_actuales = [self.grid.GetCellValue(selected_row, col) for col in range(1, 9)]
+
+            dialog = wx.Dialog(self, title="Editar Entidad", size=(400, 300))
+
+            # Crear un ScrolledWindow
+            scrolled_window = wx.ScrolledWindow(dialog)
+            scrolled_window.SetScrollRate(10, 10)  # Velocidad del scroll
+
+            # Crear un panel dentro del ScrolledWindow
+            panel = wx.Panel(scrolled_window)
+            vbox = wx.BoxSizer(wx.VERTICAL)
+
+            # Campos del formulario
+            campos = [
+                ("Tipo Brecha", wx.TextCtrl(panel, value=datos_actuales[0])),
+                ("Tipo Proyecto", wx.TextCtrl(panel, value=datos_actuales[1])),
+                ("Proceso Corregido", wx.TextCtrl(panel, value=datos_actuales[2])),
+                ("Proceso Realizado", wx.TextCtrl(panel, value=datos_actuales[3])),
+                ("Investigador ID", wx.TextCtrl(panel, value=datos_actuales[4])),
+                ("Empresa", wx.TextCtrl(panel, value=datos_actuales[5])),
+                ("Subtipo Ficha", wx.TextCtrl(panel, value=datos_actuales[6])),
+                ("Tipo Irregularidad", wx.TextCtrl(panel, value=datos_actuales[7]))
+            ]
+
+            for label, control in campos:
+                vbox.Add(wx.StaticText(panel, label=label), flag=wx.TOP | wx.LEFT, border=5)
+                vbox.Add(control, flag=wx.EXPAND | wx.ALL, border=5)
+
+            # Botones de acción
+            hbox = wx.BoxSizer(wx.HORIZONTAL)
+            btn_aceptar = wx.Button(panel, label="Aceptar", id=wx.ID_OK)
+            btn_cancelar = wx.Button(panel, label="Cancelar", id=wx.ID_CANCEL)
+            hbox.Add(btn_aceptar)
+            hbox.Add(btn_cancelar, flag=wx.LEFT, border=5)
+
+            vbox.Add(hbox, flag=wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM, border=10)
+
+            # Asignar el sizer al panel
+            panel.SetSizer(vbox)
+
+            # Ajustar el tamaño del ScrolledWindow para que se active el scroll si es necesario
+            scrolled_window.SetSizer(wx.BoxSizer())
+            scrolled_window.GetSizer().Add(panel, 1, wx.EXPAND)
+            scrolled_window.FitInside()  # Ajustar el contenido dentro del ScrolledWindow
+
+            # Mostrar el diálogo y manejar la respuesta
+            resultado = dialog.ShowModal()
+            if resultado == wx.ID_OK:
+                nuevos_datos = [control.GetValue() for _, control in campos]
+                self.controller.editar_entidad(entidad_id, *nuevos_datos)
+                self.cargar_entidades()
+            dialog.Destroy()
+
+    def on_eliminar(self, event):
+        """Elimina la entidad seleccionada."""
+        selected_row = self.grid.GetGridCursorRow()
+        if selected_row >= 0:
+            entidad_id = self.grid.GetCellValue(selected_row, 0)
+            confirm = wx.MessageBox("¿Estás seguro de que quieres eliminar esta entidad?", "Confirmar", wx.YES_NO | wx.ICON_WARNING)
+            if confirm == wx.YES:
+                self.controller.eliminar_entidad(entidad_id)
+                self.cargar_entidades()
+
+    def on_cancelar(self, event):
+        """Regresa al menú anterior."""
+        self.Hide()
+        self.menu_view.Show()
 
     def on_close(self, event):
         """Maneja el cierre de la ventana."""
-        dialogo = wx.MessageDialog(self, "¿Estás seguro de que quieres salir?", "Cerrar aplicación", wx.YES_NO | wx.ICON_QUESTION)
+        dialogo = wx.MessageDialog(self, "¿Estás seguro de que quieres regresar al menú anterior?", "Cerrar ventana", wx.YES_NO | wx.ICON_QUESTION)
         respuesta = dialogo.ShowModal()
         if respuesta == wx.ID_YES:
-            self.Destroy()  # Cierra la ventana
-            wx.Exit()  # Cierra la aplicación completamente
+            self.Hide()
+            self.menu_view.Show()
         else:
-            event.Veto()  # Cancela el cierre de la ventana
-
+            event.Veto()
