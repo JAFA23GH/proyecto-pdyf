@@ -3,6 +3,7 @@ from controllers.caso_controller import CasoController
 from controllers.entidades_controller import GestionarEntidadesController
 from controllers.disciplinario_controller import GestionardisciplinarioController
 from controllers.auditoria_controller import GestionarauditoriasController
+from controllers.cartelera_caso_controller import CarteleraCasosController
 import wx
 
 class MenuView(wx.Frame):
@@ -78,7 +79,7 @@ class MenuView(wx.Frame):
         self.controlador2 = GestionarEntidadesController(menu_view=self)
         self.controlador3 = GestionardisciplinarioController(menu_view=self)
         self.controlador4 = GestionarauditoriasController(menu_view=self)
-
+        self.controlador5 = CarteleraCasosController(menu_view=self)
         if opcion == "Registrar caso de investigación":
             self.Hide()  # Oculta la ventana del menú principal
             self.controlador.mostrar_ventana(vista="registro")
@@ -112,6 +113,9 @@ class MenuView(wx.Frame):
         elif opcion == "Consultar auditorías":
             self.Hide()  # Oculta la ventana del menú principal
             self.controlador4.mostrar_ventana(vista="Auditar")
+        elif opcion == "Consultar cartelera de casos":
+            self.Hide()  # Oculta la ventana del menú principal
+            self.controlador5.mostrar_ventana(vista="Consultar")
         else:
             wx.MessageBox(f"Seleccionaste: {opcion}", "Información", wx.OK | wx.ICON_INFORMATION)
 
