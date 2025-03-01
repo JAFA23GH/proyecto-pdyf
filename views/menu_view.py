@@ -2,6 +2,7 @@ from controllers.investigador_controller import GestionarUsuariosController
 from controllers.caso_controller import CasoController
 from controllers.entidades_controller import GestionarEntidadesController
 from controllers.disciplinario_controller import GestionardisciplinarioController
+from controllers.auditoria_controller import GestionarauditoriasController
 import wx
 
 class MenuView(wx.Frame):
@@ -52,7 +53,6 @@ class MenuView(wx.Frame):
                 "Visualizar alarmas",
                 "Gestionar entidades",
                 "Registrar archivos negados",
-                "Configurar criterios de alarmas",
                 "Consultar cartelera de casos"
             ]
 
@@ -77,7 +77,7 @@ class MenuView(wx.Frame):
         self.controlador1 = GestionarUsuariosController(menu_view=self)
         self.controlador2 = GestionarEntidadesController(menu_view=self)
         self.controlador3 = GestionardisciplinarioController(menu_view=self)
-
+        self.controlador4 = GestionarauditoriasController(menu_view=self)
 
         if opcion == "Registrar caso de investigación":
             self.Hide()  # Oculta la ventana del menú principal
@@ -109,6 +109,9 @@ class MenuView(wx.Frame):
         elif opcion == "Registrar archivos negados":
             self.Hide()  # Oculta la ventana del menú principal
             self.controlador3.mostrar_ventana(vista="Negar")
+        elif opcion == "Consultar auditorías":
+            self.Hide()  # Oculta la ventana del menú principal
+            self.controlador4.mostrar_ventana(vista="Auditar")
         else:
             wx.MessageBox(f"Seleccionaste: {opcion}", "Información", wx.OK | wx.ICON_INFORMATION)
 

@@ -1,14 +1,10 @@
 from database.db import Database
 
-class Auditoria:
-    def __init__(self, id, caso_id, accion, fecha, usuario_id):
-        self.id = id
-        self.caso_id = caso_id
-        self.accion = accion
-        self.fecha = fecha
-        self.usuario_id = usuario_id
+class auditoriaModel:
+    def __init__(self):
+        self.db = Database()
 
-    def save(self):
-        db = Database()
-        db.execute("INSERT INTO Auditorias (caso_id, accion, fecha, usuario_id) VALUES (?, ?, ?, ?)",
-                   (self.caso_id, self.accion, self.fecha, self.usuario_id))
+    def obtener_auditorias(self):
+        """Obtiene todas las auditorías de la base de datos."""
+        query = "SELECT id, caso_id, accion, fecha, usuario_id FROM Auditorias"
+        return self.db.fetch_all(query)
