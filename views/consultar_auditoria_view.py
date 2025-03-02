@@ -12,6 +12,10 @@ class ConsultarAuditoriaView(wx.Frame):
         self.InitUI()
         self.Centre()
 
+        # Cambiar el icono de la ventana
+        icon = wx.Icon("img/iconoinstitucional.ico", wx.BITMAP_TYPE_ICO)
+        self.SetIcon(icon)
+
         # Manejar el evento de cierre de la ventana
         self.Bind(wx.EVT_CLOSE, self.on_close)
 

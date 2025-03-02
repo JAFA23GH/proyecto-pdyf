@@ -5,6 +5,10 @@ class MainView(wx.Frame):
         super(MainView, self).__init__(*args, **kw)
         self.InitUI()
 
+        # Cambiar el icono de la ventana
+        icon = wx.Icon("img/iconoinstitucional.ico", wx.BITMAP_TYPE_ICO)
+        self.SetIcon(icon)
+
     def InitUI(self):
         panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
