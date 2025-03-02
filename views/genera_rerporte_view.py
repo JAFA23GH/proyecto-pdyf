@@ -70,7 +70,7 @@ class VentanaReportes(wx.Frame):
 
     def on_atras(self, event):
         """Maneja el clic en el botón 'Atrás'."""
-        self.Close()  # Cierra la ventana actual
+        self.Hide()  # Cierra la ventana actual
         self.controlador.menu_view.reopen()
 
     # Métodos para generar reportes (ya existentes)
@@ -214,3 +214,4 @@ class VentanaMostrarReporte(wx.Frame):
     def on_atras(self, event):
         """Maneja el clic en el botón 'Atrás'."""
         self.Hide()  # Cierra la ventana actual
+        self.controlador.menu_view.reopen()
