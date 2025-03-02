@@ -76,6 +76,15 @@ class CasoInvestigacionModel(Subject):
         conn.close()
         return resultado[0] if resultado else None
 
+    def obtener_nombre_investigador(self, usuario):
+        """Obtiene el nombre de un investigador por su ID."""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT nombre FROM Usuarios WHERE id=?", (usuario,))
+        resultado = cursor.fetchone()
+        conn.close()
+        return resultado[0] if resultado else None
+
     def guardar_caso(self, datos):
         """Guarda un caso de investigación en la base de datos."""
         try:

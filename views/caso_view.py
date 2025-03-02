@@ -60,7 +60,7 @@ class VentanaRegistro(wx.Frame):
             self.investigador_combo = wx.ComboBox(panel, choices=self.controlador.obtener_investigadores())
             vbox.Add(self.investigador_combo, flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=10)
         else:
-            self.investigador_text = wx.TextCtrl(panel, value=self.usuario, style=wx.TE_READONLY)
+            self.investigador_text = wx.TextCtrl(panel, value=self.controlador.obtener_nombre_investigador(self.usuario), style=wx.TE_READONLY)
             vbox.Add(self.investigador_text, flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, border=10)
 
         # Botones

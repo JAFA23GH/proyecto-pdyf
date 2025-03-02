@@ -168,6 +168,10 @@ class CasoController:
         """Obtiene el ID del investigador."""
         return self.modelo.obtener_id_investigador(nombre)
 
+    def obtener_nombre_investigador(self, usuario):
+        """Obtiene el ID del investigador."""
+        return self.modelo.obtener_nombre_investigador(usuario)
+
     def modificar_caso(self, nro_expediente, datos_actualizados, nuevo_estatus):
         """Modifica los datos de un caso específico."""
         return self.modelo.modificar_caso(nro_expediente, datos_actualizados, nuevo_estatus)
